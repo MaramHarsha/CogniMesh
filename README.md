@@ -29,8 +29,9 @@ CogniMesh is early but runnable locally. The completed modules are:
 | 10 Lineage And Provenance Ledger | Complete | OpenLineage ingestion, asset graph, column lineage payloads, policy context capture, hash-chained ledger, DataHub/Marquez/OpenLineage exports |
 | 5 Lakehouse Storage And Versioning | Complete | MinIO/S3 config, Nessie/Iceberg catalog config, Lakehouse Control API, branches, commits, merges, table snapshots, object bindings, retention, compaction, cost metadata, Kustomize base |
 | 4 Data Connection And Ingestion | Complete | Ingestion Control API, connector catalogue, source definitions, local CSV/JSON/Parquet-pointer ingestion, sample API ingestion, Postgres CDC events, schema drift, retryable runs, OpenLineage payloads, Compose and Kustomize wiring |
+| 6 Compute And Query Engines | Complete | Compute Control API, DuckDB local adapter contract, SQLite compatibility fallback, Spark-on-Kubernetes planning, Trino/Iceberg planning, execution profiles, job runs, results, logs, retries, cost metadata, OpenLineage payloads |
 
-Next module in build order: **Module 6 Compute And Query Engines**.
+Next module in build order: **Module 7 Pipeline Builder And Code Workspaces**.
 
 Modules not listed as complete are still planned work. See [plan.md](plan.md) for the full A-to-Z roadmap and tracking table.
 
@@ -44,9 +45,12 @@ flowchart TB
   API --> ID["Identity And Policy\nWorkspaces, Purposes, Roles"]
   API --> LIN["Lineage Ledger\nEvents, Graph, Hash Chain"]
   API --> ING
+  API --> CMP["Compute Control\nEngines, Jobs, Results"]
   API --> LAKE["Lakehouse Control\nCatalogs, Branches, Snapshots"]
   ING --> LIN
   ING --> LAKE
+  CMP --> LIN
+  CMP --> LAKE
   LAKE --> MINIO["MinIO / S3"]
   LAKE --> NESSIE["Nessie Catalog"]
   NESSIE --> ICE["Apache Iceberg Tables"]
@@ -99,6 +103,17 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8020/docs`
 - Health: `http://localhost:8020/health`
 
+### Compute Control
+
+Path: [services/compute-control](services/compute-control)
+
+Compute Control manages the compute engine boundary. It registers DuckDB, Spark, Trino, and local fallback adapters; stores logical SQL jobs; executes local previews and small jobs; records Spark and Trino production plans; captures results, logs, resource usage, cost tags, retries, and OpenLineage-compatible payloads.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8030/docs`
+- Health: `http://localhost:8030/health`
+
 ## Local Development
 
 ### Prerequisites
@@ -130,6 +145,7 @@ This starts:
 - Nessie
 - Lakehouse Control
 - Ingestion Control
+- Compute Control
 
 Stop the stack:
 
@@ -153,6 +169,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module1:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module2:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module4:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module5:check
+powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module6:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module10:check
 ```
 
@@ -230,6 +247,20 @@ POST /v1/ingestion/runs/{run_id}/retry
 GET /v1/ingestion/runs/{run_id}/lineage
 ```
 
+Compute:
+
+```http
+GET /v1/compute/engines
+GET /v1/compute/profiles
+POST /v1/compute/sql/preview
+POST /v1/compute/jobs
+POST /v1/compute/jobs/{job_id}/runs
+GET /v1/compute/runs/{run_id}/results
+GET /v1/compute/runs/{run_id}/logs
+GET /v1/compute/runs/{run_id}/lineage
+POST /v1/compute/runs/{run_id}/retry
+```
+
 ## Repository Layout
 
 ```text
@@ -253,8 +284,8 @@ Recommended build order from [plan.md](plan.md):
 4. Lineage And Provenance Ledger: complete
 5. Lakehouse Storage And Versioning: complete
 6. Data Connection And Ingestion: complete
-7. Compute And Query Engines: next
-8. Pipeline Builder And Code Workspaces
+7. Compute And Query Engines: complete
+8. Pipeline Builder And Code Workspaces: next
 9. Semantic Modeling And dbt Integration
 10. Object Query Service
 11. Data Quality And Contracts
@@ -292,6 +323,7 @@ Key docs:
 - [Lineage and provenance ledger](docs/architecture/lineage-provenance-ledger.md)
 - [Lakehouse storage and versioning](docs/architecture/lakehouse-storage-versioning.md)
 - [Data connection and ingestion](docs/architecture/data-connection-ingestion.md)
+- [Compute and query engines](docs/architecture/compute-query-engines.md)
 - [Local development](docs/engineering/local-development.md)
 - [Dependency and license policy](docs/engineering/dependency-license-policy.md)
 - [Security policy](SECURITY.md)

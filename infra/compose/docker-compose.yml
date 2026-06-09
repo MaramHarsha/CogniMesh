@@ -148,6 +148,37 @@ services:
       org.cognimesh.module: "4"
       org.cognimesh.description: "Data connection, connector registry, ingestion runs, drift, and CDC control API"
 
+  compute-control:
+    build:
+      context: ../../services/compute-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_COMPUTE_STATE_PATH: /var/lib/cognimesh/compute-control/compute.db
+      COGNIMESH_COMPUTE_RESULTS_ROOT: /var/lib/cognimesh/compute-control/results
+      COGNIMESH_LAKEHOUSE_CONTROL_URL: http://lakehouse-control:8010
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_INGESTION_CONTROL_URL: http://ingestion-control:8020
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+      COGNIMESH_TRINO_URI: ${COGNIMESH_TRINO_URI:-http://trino:8080}
+      COGNIMESH_TRINO_CATALOG: ${COGNIMESH_TRINO_CATALOG:-iceberg}
+      COGNIMESH_SPARK_NAMESPACE: ${COGNIMESH_SPARK_NAMESPACE:-cognimesh}
+      COGNIMESH_DUCKDB_IMAGE: ${COGNIMESH_DUCKDB_IMAGE:-python:3.12-slim}
+      COGNIMESH_SPARK_IMAGE: ${COGNIMESH_SPARK_IMAGE:-apache/spark:3.5.3}
+    ports:
+      - "${COGNIMESH_COMPUTE_CONTROL_PORT:-8030}:8030"
+    volumes:
+      - cognimesh-compute-control-state:/var/lib/cognimesh/compute-control
+    depends_on:
+      lakehouse-control:
+        condition: service_started
+      ingestion-control:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "6"
+      org.cognimesh.description: "Compute engine profiles, local SQL execution, Spark/Trino planning, results, retries, and lineage"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -199,3 +230,4 @@ volumes:
   cognimesh-minio-data:
   cognimesh-lakehouse-control-state:
   cognimesh-ingestion-control-state:
+  cognimesh-compute-control-state:

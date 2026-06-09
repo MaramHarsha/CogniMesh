@@ -364,14 +364,13 @@ For Module 1, only `services/object-registry`, `infra/compose`, docs, and tests 
 
 ## 15. Module Roadmap
 
-This is the canonical module map. The implementation tracker in section 59 is the source of truth for whether each module is complete.
+This is the canonical module map. The implementation tracker in section 59 is the source of truth for whether each module is complete. There is intentionally no active Module 3 in the current build order; do not create or start a Module 3 unless this plan is explicitly revised.
 
 | Module | Name | Primary outcome |
 | --- | --- | --- |
 | 0 | Project Foundation | Repository structure, standards, CI, local workflow |
 | 1 | Core Data Object Registry | Semantic object, link, property, table, graph, REST, and GraphQL metadata APIs |
 | 2 | Identity, Tenancy, And Policy Foundation | Workspaces, principals, service accounts, purposes, RBAC/ABAC, and decision logs |
-| 3 | Metadata Catalog And Search | Catalog sync, glossary, search, ownership, and metadata graph integration |
 | 4 | Data Connection And Ingestion | Connector registry, source definitions, CDC, batch ingest, schema discovery, drift, and lineage |
 | 5 | Lakehouse Storage And Versioning | MinIO/S3, Iceberg/Nessie contracts, snapshots, branches, merges, retention, and cost metadata |
 | 6 | Compute And Query Engines | DuckDB, Spark, Trino, execution profiles, and compute-job control contracts |
@@ -916,8 +915,8 @@ CogniMesh should be judged at three levels:
 | Completion level | Meaning | Required modules |
 | --- | --- | --- |
 | Developer Preview | A developer can run the control plane locally, register semantic objects, inspect the object graph, and query metadata through REST/GraphQL. | 0, 1, partial 2, partial 10, partial 19 |
-| MVP Platform | A small team can ingest data, store it in a lakehouse, transform it, register objects, query through the semantic layer, enforce basic policies, view lineage, and build a basic app. | 0-14, 19, 20, 22 |
-| Enterprise Complete | A company can run CogniMesh in production with HA, SSO, governed object APIs, app building, ML lifecycle, auditability, backups, upgrades, cost controls, SDKs, and documented operations. | 0-24 |
+| MVP Platform | A small team can ingest data, store it in a lakehouse, transform it, register objects, query through the semantic layer, enforce basic policies, view lineage, and build a basic app. | Active build-order modules through 14, plus 19, 20, 22 |
+| Enterprise Complete | A company can run CogniMesh in production with HA, SSO, governed object APIs, app building, ML lifecycle, auditability, backups, upgrades, cost controls, SDKs, and documented operations. | All active build-order modules |
 
 Completion is not "all code exists." A module is complete only when its APIs, tests, docs, deployment path, security model, observability, and upgrade path are also complete.
 
@@ -954,25 +953,24 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, 5, and 4 are complete. Module 6 Compute And Query Engines is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: Modules 0, 1, 2, 10, 5, 4, and 6 are complete. Module 7 Pipeline Builder And Code Workspaces is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
 | 0 | Project Foundation | Complete | None | Repo, standards, ADRs, CI, local workflow |
 | 1 | Core Data Object Registry | Complete | 0 | Object/link/property registry with REST/GraphQL |
 | 2 | Identity, Tenancy, And Policy Foundation | Complete | 0, 1 | OIDC, workspaces, RBAC/ABAC, purpose model |
-| 3 | Metadata Catalog And Search | Not Started | 1, 2 | DataHub/OpenLineage sync, search, glossary |
 | 4 | Data Connection And Ingestion | Complete | 0, 2, 10 | Connectors, CDC, batch ingest, schema discovery |
 | 5 | Lakehouse Storage And Versioning | Complete | 0, 2, 10 | MinIO/S3, Iceberg, Nessie, snapshots, branches |
-| 6 | Compute And Query Engines | Not Started | 5 | DuckDB, Spark, Trino, execution profiles |
+| 6 | Compute And Query Engines | Complete | 5 | DuckDB, Spark, Trino, execution profiles |
 | 7 | Pipeline Builder And Code Workspaces | Not Started | 1, 5, 6, 10 | Visual DAG, pipeline IR, dbt/Spark/SQL compilers |
-| 8 | Semantic Modeling And dbt Integration | Not Started | 1, 3, 6, 7 | dbt import, object mapping, data contracts |
+| 8 | Semantic Modeling And dbt Integration | Not Started | 1, 6, 7, 10 | dbt import, object mapping, data contracts |
 | 9 | Object Query Service | Not Started | 1, 2, 6, 8 | Governed object-set query API |
 | 10 | Lineage And Provenance Ledger | Complete | 0, 1, 2 | OpenLineage events, graph, hash ledger |
 | 11 | Data Quality And Contracts | Not Started | 5, 7, 8, 10 | Assertions, tests, freshness, anomaly checks |
 | 12 | Actions, Writeback, And Functions | Not Started | 1, 2, 9, 10 | Governed edits, rules, approvals, function runtime |
 | 13 | Low-Code App Builder Integration | Not Started | 2, 9, 12 | Appsmith/Streamlit integrations and templates |
-| 14 | Object Explorer, Object Views, And Analytics | Not Started | 3, 9, 13 | Object search, detail pages, charts, saved analyses |
+| 14 | Object Explorer, Object Views, And Analytics | Not Started | 9, 13 | Object search, detail pages, charts, saved analyses |
 | 15 | ML And Model Lifecycle | Not Started | 5, 6, 8, 9, 10 | MLflow, serving, evaluation, retraining |
 | 16 | Planning, Optimization, And AI Tooling | Not Started | 9, 12, 15 | Scenario planning, optimization, object-aware tools |
 | 17 | Advanced Governance And Compliance | Not Started | 2, 9, 10, 11 | PBAC propagation, row/column/cell controls, evidence |
@@ -1056,29 +1054,6 @@ Completion criteria:
 - API responses are scoped by workspace.
 - Policy tests cover allow, deny, role inheritance, purpose mismatch, and service account access.
 - Policy decisions are audit logged with subject, action, resource, purpose, and result.
-
-## 34. Module 3: Metadata Catalog And Search
-
-Purpose: make metadata discoverable across object registry, lakehouse, pipelines, and BI/apps.
-
-Deliverables:
-
-- DataHub integration adapter.
-- Optional lightweight local metadata mode using Postgres search.
-- Business glossary model.
-- Ownership and stewardship model.
-- Tags and classifications.
-- Full-text search over objects, properties, datasets, pipelines, models, and apps.
-- Metadata ingestion from dbt artifacts, OpenLineage events, Iceberg catalog, and object registry.
-- Search API and UI-ready result schema.
-
-Completion criteria:
-
-- Searching `employee email` returns object properties, datasets, owners, and classifications.
-- DataHub receives object type and dataset metadata.
-- Glossary terms can be attached to object properties.
-- Metadata search respects workspace and policy boundaries.
-- Search indexes can be rebuilt from source metadata.
 
 ## 35. Module 4: Data Connection And Ingestion
 
@@ -1676,7 +1651,7 @@ The full project is complete only when these workflows pass without manual datab
 
 CogniMesh is enterprise-complete when all of the following are true:
 
-- All modules 0-24 are marked `Complete`.
+- All active build-order modules are marked `Complete`.
 - All end-to-end scenarios in section 56 pass.
 - Every service has tests, docs, deployment manifests, health checks, metrics, logs, traces, and security review.
 - Object APIs are stable and versioned.
@@ -1728,10 +1703,9 @@ Use this table during implementation. Update it at the end of every module.
 | 0 Project Foundation | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 1 Object Registry | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 2 Identity/Policy | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
-| 3 Metadata/Search | No | No | No | No | No | No | No | Not Started |
 | 4 Ingestion | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 5 Lakehouse | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
-| 6 Compute | No | No | No | No | No | No | No | Not Started |
+| 6 Compute | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 7 Pipeline Builder | No | No | No | No | No | No | No | Not Started |
 | 8 Semantic/dbt | No | No | No | No | No | No | No | Not Started |
 | 9 Object Query | No | No | No | No | No | No | No | Not Started |

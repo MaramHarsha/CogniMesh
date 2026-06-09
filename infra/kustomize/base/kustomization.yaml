@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - lakehouse.yaml
   - ingestion.yaml
+  - compute.yaml

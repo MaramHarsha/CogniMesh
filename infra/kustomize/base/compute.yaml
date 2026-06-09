@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: compute-control-state
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: compute-control
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compute-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: compute-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cognimesh
+      app.kubernetes.io/component: compute-control
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cognimesh
+        app.kubernetes.io/component: compute-control
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: compute-control
+          image: cognimesh/compute-control:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8030
+          env:
+            - name: COGNIMESH_ENV
+              value: kubernetes
+            - name: COGNIMESH_SERVICE_NAME
+              value: cognimesh-compute-control
+            - name: COGNIMESH_ALLOW_DEV_AUTH
+              value: "false"
+            - name: COGNIMESH_COMPUTE_STATE_PATH
+              value: /var/lib/cognimesh/compute-control/compute.db
+            - name: COGNIMESH_COMPUTE_RESULTS_ROOT
+              value: /var/lib/cognimesh/compute-control/results
+            - name: COGNIMESH_LAKEHOUSE_CONTROL_URL
+              value: http://lakehouse-control:8010
+            - name: COGNIMESH_OBJECT_REGISTRY_URL
+              value: http://object-registry:8000
+            - name: COGNIMESH_INGESTION_CONTROL_URL
+              value: http://ingestion-control:8020
+            - name: COGNIMESH_LINEAGE_ENDPOINT_URL
+              value: http://object-registry:8000/v1/lineage/openlineage
+            - name: COGNIMESH_TRINO_URI
+              value: http://trino:8080
+            - name: COGNIMESH_TRINO_CATALOG
+              value: iceberg
+            - name: COGNIMESH_SPARK_NAMESPACE
+              value: cognimesh
+            - name: COGNIMESH_DUCKDB_IMAGE
+              value: python:3.12-slim
+            - name: COGNIMESH_SPARK_IMAGE
+              value: apache/spark:3.5.3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: compute-state
+              mountPath: /var/lib/cognimesh/compute-control
+      volumes:
+        - name: compute-state
+          persistentVolumeClaim:
+            claimName: compute-control-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compute-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: compute-control
+spec:
+  selector:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: compute-control
+  ports:
+    - name: http
+      port: 8030
+      targetPort: http
