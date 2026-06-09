@@ -1,0 +1,339 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cognimesh-lakehouse-config
+  labels:
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+data:
+  COGNIMESH_ENV: kubernetes
+  COGNIMESH_LOG_LEVEL: INFO
+  COGNIMESH_ALLOW_DEV_AUTH: "true"
+  COGNIMESH_LAKEHOUSE_STATE_PATH: /var/lib/cognimesh/lakehouse-control/lakehouse.db
+  COGNIMESH_LAKEHOUSE_WAREHOUSE_URI: s3://cognimesh-lakehouse/warehouse
+  COGNIMESH_S3_ENDPOINT_URL: http://minio:9000
+  COGNIMESH_S3_PUBLIC_ENDPOINT_URL: http://minio:9000
+  COGNIMESH_S3_BUCKET: cognimesh-lakehouse
+  COGNIMESH_S3_REGION: us-east-1
+  COGNIMESH_NESSIE_URI: http://nessie:19120/api/v2
+  COGNIMESH_ICEBERG_REST_URI: http://nessie:19120/iceberg
+  COGNIMESH_STORAGE_COST_PER_GB_MONTH: "0.023"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cognimesh-s3-credentials
+  labels:
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+type: Opaque
+stringData:
+  COGNIMESH_S3_ACCESS_KEY: CogniMesh
+  COGNIMESH_S3_SECRET_KEY: CogniMesh-secret
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-data
+  labels:
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lakehouse-control-state
+  labels:
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio
+        app.kubernetes.io/part-of: cognimesh
+    spec:
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":9001"
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cognimesh-s3-credentials
+                  key: COGNIMESH_S3_ACCESS_KEY
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cognimesh-s3-credentials
+                  key: COGNIMESH_S3_SECRET_KEY
+          ports:
+            - name: api
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: minio-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  selector:
+    app.kubernetes.io/name: minio
+  ports:
+    - name: api
+      port: 9000
+      targetPort: api
+    - name: console
+      port: 9001
+      targetPort: console
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nessie
+  labels:
+    app.kubernetes.io/name: nessie
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nessie
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nessie
+        app.kubernetes.io/part-of: cognimesh
+    spec:
+      containers:
+        - name: nessie
+          image: ghcr.io/projectnessie/nessie:0.107.6
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 19120
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: http
+            initialDelaySeconds: 40
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nessie
+  labels:
+    app.kubernetes.io/name: nessie
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  selector:
+    app.kubernetes.io/name: nessie
+  ports:
+    - name: http
+      port: 19120
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lakehouse-control
+  labels:
+    app.kubernetes.io/name: lakehouse-control
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lakehouse-control
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lakehouse-control
+        app.kubernetes.io/part-of: cognimesh
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: lakehouse-control
+          image: cognimesh-lakehouse-control:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: cognimesh-lakehouse-config
+            - secretRef:
+                name: cognimesh-s3-credentials
+          ports:
+            - name: http
+              containerPort: 8010
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: state
+              mountPath: /var/lib/cognimesh/lakehouse-control
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: lakehouse-control-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lakehouse-control
+  labels:
+    app.kubernetes.io/name: lakehouse-control
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  selector:
+    app.kubernetes.io/name: lakehouse-control
+  ports:
+    - name: http
+      port: 8010
+      targetPort: http
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: lakehouse-retention-dry-run
+  labels:
+    app.kubernetes.io/name: lakehouse-retention-dry-run
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  schedule: "0 2 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: retention
+              image: curlimages/curl:8.11.1
+              imagePullPolicy: IfNotPresent
+              args:
+                - -sSf
+                - -X
+                - POST
+                - http://lakehouse-control:8010/v1/lakehouse/maintenance/retention
+                - -H
+                - "Content-Type: application/json"
+                - -H
+                - "X-CogniMesh-Actor: k8s-retention"
+                - -H
+                - "X-CogniMesh-Roles: data_engineer"
+                - -H
+                - "X-CogniMesh-Purpose: maintenance"
+                - -d
+                - '{"table_id":"replace-me","branch_name":"main","retain_last":2,"dry_run":true,"safe_mode":true}'
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: lakehouse-compaction-dry-run
+  labels:
+    app.kubernetes.io/name: lakehouse-compaction-dry-run
+    app.kubernetes.io/part-of: cognimesh
+    cognimesh.org/module: "5"
+spec:
+  schedule: "30 2 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: compaction
+              image: curlimages/curl:8.11.1
+              imagePullPolicy: IfNotPresent
+              args:
+                - -sSf
+                - -X
+                - POST
+                - http://lakehouse-control:8010/v1/lakehouse/maintenance/compaction
+                - -H
+                - "Content-Type: application/json"
+                - -H
+                - "X-CogniMesh-Actor: k8s-compaction"
+                - -H
+                - "X-CogniMesh-Roles: data_engineer"
+                - -H
+                - "X-CogniMesh-Purpose: maintenance"
+                - -d
+                - '{"table_id":"replace-me","branch_name":"main","target_file_size_bytes":134217728,"dry_run":true,"safe_mode":true}'

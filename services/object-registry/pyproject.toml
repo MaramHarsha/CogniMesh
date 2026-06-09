@@ -1,0 +1,26 @@
+[project]
+name = "cognimesh-object-registry"
+version = "0.1.0"
+description = "CogniMesh Core Data Object Registry"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.13,<2.0",
+  "casbin>=1.36,<2.0",
+  "fastapi>=0.115,<1.0",
+  "PyJWT[crypto]>=2.9,<3.0",
+  "psycopg[binary]>=3.2,<4.0",
+  "pydantic>=2.7,<3.0",
+  "sqlalchemy>=2.0,<3.0",
+  "strawberry-graphql[fastapi]>=0.250,<1.0",
+  "uvicorn[standard]>=0.30,<1.0",
+]
+
+[project.optional-dependencies]
+test = [
+  "httpx>=0.27,<1.0",
+  "pytest>=8.0,<9.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

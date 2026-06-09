@@ -1,0 +1,7 @@
+global:
+  environment: development
+  imagePullPolicy: IfNotPresent
+
+foundation:
+  enabled: true
+

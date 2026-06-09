@@ -1,0 +1,13 @@
+alembic<2.0,>=1.13
+casbin<2.0,>=1.36
+fastapi<1.0,>=0.115
+PyJWT[crypto]<3.0,>=2.9
+psycopg[binary]<4.0,>=3.2
+pydantic<3.0,>=2.7
+sqlalchemy<3.0,>=2.0
+strawberry-graphql[fastapi]<1.0,>=0.250
+uvicorn[standard]<1.0,>=0.30
+
+[test]
+httpx<1.0,>=0.27
+pytest<9.0,>=8.0

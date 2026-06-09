@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: cognimesh-object-registry
+Version: 0.1.0
+Summary: CogniMesh Core Data Object Registry
+Requires-Python: >=3.12
+Requires-Dist: alembic<2.0,>=1.13
+Requires-Dist: casbin<2.0,>=1.36
+Requires-Dist: fastapi<1.0,>=0.115
+Requires-Dist: PyJWT[crypto]<3.0,>=2.9
+Requires-Dist: psycopg[binary]<4.0,>=3.2
+Requires-Dist: pydantic<3.0,>=2.7
+Requires-Dist: sqlalchemy<3.0,>=2.0
+Requires-Dist: strawberry-graphql[fastapi]<1.0,>=0.250
+Requires-Dist: uvicorn[standard]<1.0,>=0.30
+Provides-Extra: test
+Requires-Dist: httpx<1.0,>=0.27; extra == "test"
+Requires-Dist: pytest<9.0,>=8.0; extra == "test"

@@ -1,0 +1,4 @@
+CogniMesh foundation chart installed.
+
+This chart is a Module 0 placeholder. Runtime Kubernetes resources are added by later modules.
+

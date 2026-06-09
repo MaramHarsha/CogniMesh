@@ -1,0 +1,2 @@
+"""CogniMesh Object Registry service."""
+

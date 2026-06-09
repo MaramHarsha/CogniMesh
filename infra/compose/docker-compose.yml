@@ -1,0 +1,173 @@
+name: cognimesh
+
+services:
+  foundation:
+    image: alpine:3.20
+    profiles:
+      - foundation
+    command:
+      - sh
+      - -c
+      - "while true; do sleep 3600; done"
+    labels:
+      org.cognimesh.module: "0"
+      org.cognimesh.description: "Placeholder development container for Module 0 foundation checks"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${COGNIMESH_POSTGRES_USER:-cognimesh}
+      POSTGRES_PASSWORD: ${COGNIMESH_POSTGRES_PASSWORD:-cognimesh}
+      POSTGRES_DB: ${COGNIMESH_POSTGRES_DB:-cognimesh_registry}
+    ports:
+      - "${COGNIMESH_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - cognimesh-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${COGNIMESH_POSTGRES_USER:-cognimesh} -d ${COGNIMESH_POSTGRES_DB:-cognimesh_registry}
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    labels:
+      org.cognimesh.module: "1"
+      org.cognimesh.description: "Object Registry metadata database"
+
+  object-registry:
+    build:
+      context: ../../services/object-registry
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_DATABASE_URL: postgresql+psycopg://${COGNIMESH_POSTGRES_USER:-cognimesh}:${COGNIMESH_POSTGRES_PASSWORD:-cognimesh}@postgres:5432/${COGNIMESH_POSTGRES_DB:-cognimesh_registry}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_OIDC_ISSUER_URL: ${COGNIMESH_OIDC_ISSUER_URL:-}
+      COGNIMESH_OIDC_AUDIENCE: ${COGNIMESH_OIDC_AUDIENCE:-}
+      COGNIMESH_OIDC_JWKS_URL: ${COGNIMESH_OIDC_JWKS_URL:-}
+    ports:
+      - "${COGNIMESH_OBJECT_REGISTRY_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      org.cognimesh.module: "1"
+      org.cognimesh.description: "Core Data Object Registry API"
+
+  minio:
+    image: quay.io/minio/minio:latest
+    command:
+      - server
+      - /data
+      - --console-address
+      - ":9001"
+    environment:
+      MINIO_ROOT_USER: ${COGNIMESH_S3_ACCESS_KEY:-cognimesh}
+      MINIO_ROOT_PASSWORD: ${COGNIMESH_S3_SECRET_KEY:-cognimesh-secret}
+    ports:
+      - "${COGNIMESH_MINIO_API_PORT:-9000}:9000"
+      - "${COGNIMESH_MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - cognimesh-minio-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - mc
+        - ready
+        - local
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    labels:
+      org.cognimesh.module: "5"
+      org.cognimesh.description: "Local S3-compatible object store for lakehouse data"
+
+  nessie:
+    image: ghcr.io/projectnessie/nessie:0.107.6
+    ports:
+      - "${COGNIMESH_NESSIE_PORT:-19120}:19120"
+    labels:
+      org.cognimesh.module: "5"
+      org.cognimesh.description: "Nessie catalog with Git-like references and Iceberg REST support"
+
+  lakehouse-control:
+    build:
+      context: ../../services/lakehouse-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_LAKEHOUSE_STATE_PATH: /var/lib/cognimesh/lakehouse-control/lakehouse.db
+      COGNIMESH_LAKEHOUSE_WAREHOUSE_URI: s3://${COGNIMESH_S3_BUCKET:-cognimesh-lakehouse}/warehouse
+      COGNIMESH_S3_ENDPOINT_URL: http://minio:9000
+      COGNIMESH_S3_PUBLIC_ENDPOINT_URL: http://localhost:${COGNIMESH_MINIO_API_PORT:-9000}
+      COGNIMESH_S3_BUCKET: ${COGNIMESH_S3_BUCKET:-cognimesh-lakehouse}
+      COGNIMESH_S3_ACCESS_KEY: ${COGNIMESH_S3_ACCESS_KEY:-cognimesh}
+      COGNIMESH_S3_SECRET_KEY: ${COGNIMESH_S3_SECRET_KEY:-cognimesh-secret}
+      COGNIMESH_S3_REGION: ${COGNIMESH_S3_REGION:-us-east-1}
+      COGNIMESH_NESSIE_URI: http://nessie:19120/api/v2
+      COGNIMESH_ICEBERG_REST_URI: http://nessie:19120/iceberg
+      COGNIMESH_STORAGE_COST_PER_GB_MONTH: ${COGNIMESH_STORAGE_COST_PER_GB_MONTH:-0.023}
+    ports:
+      - "${COGNIMESH_LAKEHOUSE_CONTROL_PORT:-8010}:8010"
+    volumes:
+      - cognimesh-lakehouse-control-state:/var/lib/cognimesh/lakehouse-control
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "5"
+      org.cognimesh.description: "Lakehouse storage and versioning control API"
+
+  neo4j:
+    image: neo4j:5-community
+    profiles:
+      - graph
+    environment:
+      NEO4J_AUTH: ${COGNIMESH_NEO4J_AUTH:-neo4j/cognimesh}
+    ports:
+      - "${COGNIMESH_NEO4J_HTTP_PORT:-7474}:7474"
+      - "${COGNIMESH_NEO4J_BOLT_PORT:-7687}:7687"
+    volumes:
+      - cognimesh-neo4j-data:/data
+    labels:
+      org.cognimesh.module: "1"
+      org.cognimesh.description: "Optional graph backend profile"
+
+  adminer:
+    image: adminer:4
+    profiles:
+      - tools
+    ports:
+      - "${COGNIMESH_ADMINER_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+    labels:
+      org.cognimesh.module: "1"
+      org.cognimesh.description: "Optional database browser"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    profiles:
+      - identity
+    command:
+      - start-dev
+    environment:
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KEYCLOAK_ADMIN: ${COGNIMESH_KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${COGNIMESH_KEYCLOAK_ADMIN_PASSWORD:-cognimesh}
+    ports:
+      - "${COGNIMESH_KEYCLOAK_PORT:-8081}:8080"
+    labels:
+      org.cognimesh.module: "2"
+      org.cognimesh.description: "Optional Keycloak OIDC provider for local identity testing"
+
+volumes:
+  cognimesh-postgres-data:
+  cognimesh-neo4j-data:
+  cognimesh-minio-data:
+  cognimesh-lakehouse-control-state:
