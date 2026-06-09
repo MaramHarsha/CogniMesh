@@ -29,7 +29,7 @@ def get_settings() -> Settings:
         log_level=os.getenv("COGNIMESH_LOG_LEVEL", "INFO"),
         database_url=os.getenv(
             "COGNIMESH_DATABASE_URL",
-            "postgresql+psycopg://CogniMesh:CogniMesh@postgres:5432/cognimesh_registry",
+            "postgresql+psycopg://cognimesh:cognimesh@postgres:5432/cognimesh_registry",
         ),
         cors_origins=[origin.strip() for origin in origins.split(",") if origin.strip()],
         oidc_issuer_url=os.getenv("COGNIMESH_OIDC_ISSUER_URL") or None,

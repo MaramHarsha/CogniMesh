@@ -15,7 +15,7 @@ REQUIRED_DIRS = [
     "docs/user-guides",
     "examples",
     "infra/compose",
-    "infra/helm/CogniMesh/templates",
+    "infra/helm/cognimesh/templates",
     "infra/kustomize/base",
     "infra/terraform",
     "infra/kind",
@@ -51,9 +51,9 @@ REQUIRED_FILES = [
     "docs/operator-guides/foundation-deployment.md",
     "infra/compose/docker-compose.yml",
     "infra/compose/.env.example",
-    "infra/helm/CogniMesh/Chart.yaml",
-    "infra/helm/CogniMesh/values.yaml",
-    "infra/helm/CogniMesh/templates/NOTES.txt",
+    "infra/helm/cognimesh/Chart.yaml",
+    "infra/helm/cognimesh/values.yaml",
+    "infra/helm/cognimesh/templates/NOTES.txt",
     "infra/kustomize/base/kustomization.yaml",
     "scripts/of.ps1",
     "scripts/validate_foundation.py",
@@ -126,4 +126,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -38,7 +38,8 @@ Configure:
 
 ```text
 COGNIMESH_OIDC_ISSUER_URL=http://keycloak:8080/realms/cognimesh
-COGNIMESH_OIDC_AUDIENCE=cognimesh`nCOGNIMESH_OIDC_JWKS_URL=http://keycloak:8080/realms/cognimesh/protocol/openid-connect/certs
+COGNIMESH_OIDC_AUDIENCE=cognimesh
+COGNIMESH_OIDC_JWKS_URL=http://keycloak:8080/realms/cognimesh/protocol/openid-connect/certs
 ```
 
 The optional local Keycloak Compose profile is:

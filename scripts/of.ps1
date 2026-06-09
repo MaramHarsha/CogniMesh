@@ -123,6 +123,19 @@ function Invoke-Module5Check {
   }
 }
 
+function Invoke-Module4Check {
+  $servicePython = Join-Path $Root "services/object-registry/.venv/Scripts/python.exe"
+  if (Test-Path -LiteralPath $servicePython) {
+    & $servicePython (Join-Path $Root "scripts/validate_module4.py")
+    if ($LASTEXITCODE -ne 0) {
+      throw "Module 4 validation failed with exit code $LASTEXITCODE."
+    }
+  }
+  else {
+    Invoke-Python -PythonArgs @((Join-Path $Root "scripts/validate_module4.py"))
+  }
+}
+
 function Invoke-Module10Check {
   $servicePython = Join-Path $Root "services/object-registry/.venv/Scripts/python.exe"
   if (Test-Path -LiteralPath $servicePython) {
@@ -147,12 +160,13 @@ switch ($Task) {
     Write-Host "  format       Run formatters when module code exists"
     Write-Host "  seed         Run seed data when modules provide seeds"
     Write-Host "  dev          Start local developer environment"
-    Write-Host "  compose:up   Build and start the local Object Registry stack"
+    Write-Host "  compose:up   Build and start the local CogniMesh stack"
     Write-Host "  compose:down Stop the local Compose stack"
     Write-Host "  module1:check Validate Module 1 files and tests"
     Write-Host "  module1:install Install Module 1 Python dependencies into service venv"
     Write-Host "  module1:seed  Seed the Employee domain"
     Write-Host "  module2:check Validate Module 2 identity and policy foundation"
+    Write-Host "  module4:check Validate Module 4 data connection and ingestion"
     Write-Host "  module5:check Validate Module 5 lakehouse storage and versioning"
     Write-Host "  module10:check Validate Module 10 lineage and provenance ledger"
   }
@@ -169,6 +183,9 @@ switch ($Task) {
   }
   "module2:check" {
     Invoke-Module2Check
+  }
+  "module4:check" {
+    Invoke-Module4Check
   }
   "module5:check" {
     Invoke-Module5Check
@@ -210,6 +227,9 @@ switch ($Task) {
       if (Test-Path -LiteralPath (Join-Path $Root "services/lakehouse-control")) {
         Invoke-Module5Check
       }
+      if (Test-Path -LiteralPath (Join-Path $Root "services/ingestion-control")) {
+        Invoke-Module4Check
+      }
     }
     Write-Host "CogniMesh validation gates completed."
   }
@@ -236,11 +256,11 @@ switch ($Task) {
     }
   }
   "dev" {
-    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control")
-    Write-Host "CogniMesh Object Registry developer environment started."
+    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control")
+    Write-Host "CogniMesh developer environment started."
   }
   "compose:up" {
-    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control")
+    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control")
   }
   "compose:down" {
     Invoke-Compose -ComposeArgs @("down")

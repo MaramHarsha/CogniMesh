@@ -14,9 +14,8 @@ Module 1 will add PostgreSQL and the Object Registry service.
 
 ## Helm
 
-The Helm chart at `infra/helm/CogniMesh` is an umbrella placeholder. Runtime templates are added as modules are implemented.
+The Helm chart at `infra/helm/cognimesh` is an umbrella placeholder. Runtime templates are added as modules are implemented.
 
 ## Kustomize
 
 The base at `infra/kustomize/base` is intentionally empty until Kubernetes resources exist.
-

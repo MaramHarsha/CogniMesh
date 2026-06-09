@@ -364,143 +364,35 @@ For Module 1, only `services/object-registry`, `infra/compose`, docs, and tests 
 
 ## 15. Module Roadmap
 
-### Module 1: Core Data Object Registry
+This is the canonical module map. The implementation tracker in section 59 is the source of truth for whether each module is complete.
 
-Goal: register physical tables as semantic objects and expose object graph APIs.
-
-Key capabilities:
-
-- Register source systems and physical tables.
-- Define object types with properties mapped to table columns.
-- Define link types between objects.
-- Store object graph metadata in PostgreSQL.
-- Optionally mirror graph edges into Neo4j.
-- Expose REST and GraphQL APIs.
-- Track metadata revisions.
-- Emit initial OpenLineage-compatible events.
-- Provide policy hooks, even if full enforcement lands later.
-
-### Module 2: Ingestion And Connector Plane
-
-Goal: land source data into raw lakehouse zones.
-
-Key capabilities:
-
-- Apache Hop project execution.
-- Meltano/Singer connector execution.
-- Debezium-based CDC for Postgres/MySQL/MongoDB where appropriate.
-- Connector registry and secrets management.
-- Raw zone write to Iceberg/Parquet.
-- Source schema discovery and drift detection.
-
-### Module 3: Lakehouse Storage And Catalog
-
-Goal: transactional, versioned, branchable data assets.
-
-Key capabilities:
-
-- MinIO/S3 storage abstraction.
-- Iceberg table creation and maintenance.
-- Nessie catalog branches/tags/commits.
-- Optional Delta Lake.
-- Snapshot retention and compaction.
-- Data asset version registry.
-
-### Module 4: Compute And Pipeline Builder
-
-Goal: build low-code and code-native transformations.
-
-Key capabilities:
-
-- Visual DAG builder using a portable CogniMesh Pipeline IR.
-- IR compilers to SQL, dbt models, PySpark jobs, and DuckDB jobs.
-- Preview mode using DuckDB samples.
-- Production mode using Spark/Trino/Argo/Prefect.
-- Pipeline versioning and promotion.
-- Runtime lineage emission.
-
-### Module 5: Semantic Modeling And dbt Integration
-
-Goal: convert raw/staged tables into governed domain objects.
-
-Key capabilities:
-
-- Import dbt manifest/catalog/run_results artifacts.
-- Map dbt models to Object Types.
-- Sync dbt tests to Object Registry data contracts.
-- Generate object/property documentation from dbt docs.
-- Push object metadata to DataHub.
-- Compute column lineage from dbt dependency graph and SQL parsing.
-
-### Module 6: Object Query Service
-
-Goal: provide governed object-set querying.
-
-Key capabilities:
-
-- Query objects by semantic names, not table names.
-- Search around links and related objects.
-- Filter, aggregate, sort, paginate, and project properties.
-- Enforce row/column/purpose policies.
-- Compile object queries to SQL for Trino, Postgres, DuckDB, or Spark.
-- Support object views, dashboards, apps, and ML feature access.
-
-### Module 7: Low-Code/No-Code App Builder Integration
-
-Goal: build apps against the Object Layer.
-
-Key capabilities:
-
-- Appsmith datasource plugin/config templates for CogniMesh REST/GraphQL.
-- Streamlit SDK with typed object clients.
-- App deployment metadata tied to purposes.
-- App-level audit logging.
-- Templates for object detail pages, approval workflows, dashboards, and operational queues.
-
-### Module 8: Governance, Policy, And Lineage
-
-Goal: enforce enterprise controls end to end.
-
-Key capabilities:
-
-- Keycloak SSO.
-- Casbin policy management.
-- Ranger integration for Trino/Spark/Hive-compatible engines.
-- Purpose registry and propagation.
-- Sensitive data classification.
-- Immutable lineage ledger.
-- Data contracts and quality checks.
-- Audit search and export.
-
-### Module 9: ML And Operational AI Lifecycle
-
-Goal: make models first-class object-layer citizens.
-
-Key capabilities:
-
-- MLflow tracking and registry.
-- Model input/output schema tied to Object Types.
-- Batch scoring pipelines.
-- Live serving endpoints with KServe/BentoML.
-- Evaluation jobs and drift checks.
-- Predictions written back as object properties or linked Prediction objects.
-- Automated retraining loops with lineage and approvals.
-
-### Module 10: Production Operations
-
-Goal: reliable self-hosted platform operations.
-
-Key capabilities:
-
-- Helm chart.
-- Kustomize overlays.
-- Backup/restore runbooks.
-- HA Postgres guidance.
-- Secrets management with External Secrets or SOPS.
-- Observability dashboards.
-- Upgrade/migration framework.
-- Security hardening guide.
-- Air-gapped install bundle.
+| Module | Name | Primary outcome |
+| --- | --- | --- |
+| 0 | Project Foundation | Repository structure, standards, CI, local workflow |
+| 1 | Core Data Object Registry | Semantic object, link, property, table, graph, REST, and GraphQL metadata APIs |
+| 2 | Identity, Tenancy, And Policy Foundation | Workspaces, principals, service accounts, purposes, RBAC/ABAC, and decision logs |
+| 3 | Metadata Catalog And Search | Catalog sync, glossary, search, ownership, and metadata graph integration |
+| 4 | Data Connection And Ingestion | Connector registry, source definitions, CDC, batch ingest, schema discovery, drift, and lineage |
+| 5 | Lakehouse Storage And Versioning | MinIO/S3, Iceberg/Nessie contracts, snapshots, branches, merges, retention, and cost metadata |
+| 6 | Compute And Query Engines | DuckDB, Spark, Trino, execution profiles, and compute-job control contracts |
+| 7 | Pipeline Builder And Code Workspaces | Visual DAGs, pipeline IR, code workspaces, compilation, scheduling, and lineage emission |
+| 8 | Semantic Modeling And dbt Integration | dbt artifact import, semantic mappings, Object Layer model promotion, and metadata sync |
+| 9 | Object Query Service | Governed object-set query API with row/column/purpose enforcement |
+| 10 | Lineage And Provenance Ledger | OpenLineage ingestion, asset/column/row provenance, and hash-chained audit records |
+| 11 | Data Quality And Contracts | Data contracts, quality checks, dbt test integration, and promotion gates |
+| 12 | Actions, Writeback, And Functions | Governed object actions, validations, side effects, function runtime, and audit |
+| 13 | Low-Code App Builder Integration | Appsmith, Streamlit, app registry, purpose binding, and app lineage |
+| 14 | Object Explorer, Object Views, And Analytics | Native console experiences for object search, graph navigation, views, and analyses |
+| 15 | ML And Model Lifecycle | MLflow, model registry, serving, evaluation, drift, retraining, and prediction writeback |
+| 16 | Planning, Optimization, And AI Tooling | Scenario modeling, simulation, optimization, and object-aware AI tooling |
+| 17 | Advanced Governance And Compliance | Classification, purpose propagation, masking, row filters, retention, and compliance audit |
+| 18 | Kubernetes Production Platform | Helm, Kustomize overlays, GitOps, networking, TLS, and production install paths |
+| 19 | SDKs, CLI, And Developer Experience | Python/TypeScript SDKs, CLI, generated clients, examples, and compatibility checks |
+| 20 | Observability, Reliability, And Operations | Metrics, traces, logs, dashboards, alerts, SLOs, runbooks, and load tests |
+| 21 | Backup, Restore, Migration, And Upgrade | Backup scripts, restore verification, migration framework, and upgrade/rollback plans |
+| 22 | Reference Domains And Demo Apps | Synthetic end-to-end domains proving ingestion, transforms, objects, apps, policy, and ML |
+| 23 | Marketplace And Extension System | Connector, object, app, pipeline, and policy packs with signatures and compatibility checks |
+| 24 | Security Hardening And Release Certification | Threat model, SBOM, scanning, signing, pen-test checklist, and release gates |
 
 ## 16. Module 1 Detailed Plan: Core Data Object Registry
 
@@ -1062,7 +954,7 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, and 5 are complete. Module 4 Data Connection And Ingestion is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: Modules 0, 1, 2, 10, 5, and 4 are complete. Module 6 Compute And Query Engines is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
@@ -1070,7 +962,7 @@ Current status: Modules 0, 1, 2, 10, and 5 are complete. Module 4 Data Connectio
 | 1 | Core Data Object Registry | Complete | 0 | Object/link/property registry with REST/GraphQL |
 | 2 | Identity, Tenancy, And Policy Foundation | Complete | 0, 1 | OIDC, workspaces, RBAC/ABAC, purpose model |
 | 3 | Metadata Catalog And Search | Not Started | 1, 2 | DataHub/OpenLineage sync, search, glossary |
-| 4 | Data Connection And Ingestion | Not Started | 0, 2, 10 | Connectors, CDC, batch ingest, schema discovery |
+| 4 | Data Connection And Ingestion | Complete | 0, 2, 10 | Connectors, CDC, batch ingest, schema discovery |
 | 5 | Lakehouse Storage And Versioning | Complete | 0, 2, 10 | MinIO/S3, Iceberg, Nessie, snapshots, branches |
 | 6 | Compute And Query Engines | Not Started | 5 | DuckDB, Spark, Trino, execution profiles |
 | 7 | Pipeline Builder And Code Workspaces | Not Started | 1, 5, 6, 10 | Visual DAG, pipeline IR, dbt/Spark/SQL compilers |
@@ -1837,7 +1729,7 @@ Use this table during implementation. Update it at the end of every module.
 | 1 Object Registry | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 2 Identity/Policy | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 3 Metadata/Search | No | No | No | No | No | No | No | Not Started |
-| 4 Ingestion | No | No | No | No | No | No | No | Not Started |
+| 4 Ingestion | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 5 Lakehouse | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 6 Compute | No | No | No | No | No | No | No | Not Started |
 | 7 Pipeline Builder | No | No | No | No | No | No | No | Not Started |

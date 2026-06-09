@@ -29,7 +29,7 @@ metadata:
 type: Opaque
 stringData:
   COGNIMESH_S3_ACCESS_KEY: CogniMesh
-  COGNIMESH_S3_SECRET_KEY: CogniMesh-secret
+  COGNIMESH_S3_SECRET_KEY: cognimesh-secret
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

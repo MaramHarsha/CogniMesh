@@ -121,6 +121,33 @@ services:
       org.cognimesh.module: "5"
       org.cognimesh.description: "Lakehouse storage and versioning control API"
 
+  ingestion-control:
+    build:
+      context: ../../services/ingestion-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_INGESTION_STATE_PATH: /var/lib/cognimesh/ingestion-control/ingestion.db
+      COGNIMESH_INGESTION_LOCAL_ROOT: /var/lib/cognimesh/ingestion-control/files
+      COGNIMESH_INGESTION_RAW_ROOT: /var/lib/cognimesh/ingestion-control/raw
+      COGNIMESH_INGESTION_TARGET_FORMAT: ${COGNIMESH_INGESTION_TARGET_FORMAT:-parquet}
+      COGNIMESH_LAKEHOUSE_CONTROL_URL: http://lakehouse-control:8010
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+    ports:
+      - "${COGNIMESH_INGESTION_CONTROL_PORT:-8020}:8020"
+    volumes:
+      - cognimesh-ingestion-control-state:/var/lib/cognimesh/ingestion-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      lakehouse-control:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "4"
+      org.cognimesh.description: "Data connection, connector registry, ingestion runs, drift, and CDC control API"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -171,3 +198,4 @@ volumes:
   cognimesh-neo4j-data:
   cognimesh-minio-data:
   cognimesh-lakehouse-control-state:
+  cognimesh-ingestion-control-state:
