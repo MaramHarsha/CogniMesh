@@ -31,8 +31,9 @@ CogniMesh is early but runnable locally. The completed modules are:
 | 4 Data Connection And Ingestion | Complete | Ingestion Control API, connector catalogue, source definitions, local CSV/JSON/Parquet-pointer ingestion, sample API ingestion, Postgres CDC events, schema drift, retryable runs, OpenLineage payloads, Compose and Kustomize wiring |
 | 6 Compute And Query Engines | Complete | Compute Control API, DuckDB local adapter contract, SQLite compatibility fallback, Spark-on-Kubernetes planning, Trino/Iceberg planning, execution profiles, job runs, results, logs, retries, cost metadata, OpenLineage payloads |
 | 7 Pipeline Builder And Code Workspaces | Complete | Pipeline Control API, Pipeline IR, visual DAG backend, SQL/dbt/PySpark compilers, local preview runtime, quality results, run lineage, versions, promotion, Git-reviewable exports, workspace templates |
+| 8 Semantic Modeling And dbt Integration | Complete | Semantic Control API, dbt manifest/catalog/run_results import, dataset mapping, data contracts from dbt tests, dbt docs propagation, model lineage events, object mappings, validation rules, interfaces, shared value types, catalog sync |
 
-Next module in build order: **Module 8 Semantic Modeling And dbt Integration**.
+Next module in build order: **Module 9 Object Query Service**.
 
 Modules not listed as complete are still planned work. See [plan.md](plan.md) for the full A-to-Z roadmap and tracking table.
 
@@ -48,6 +49,7 @@ flowchart TB
   API --> ING
   API --> CMP["Compute Control\nEngines, Jobs, Results"]
   API --> PIPE["Pipeline Control\nDAGs, IR, Compilers"]
+  API --> SEM["Semantic Control\ndbt Import, Contracts, Mappings"]
   API --> LAKE["Lakehouse Control\nCatalogs, Branches, Snapshots"]
   ING --> LIN
   ING --> LAKE
@@ -55,6 +57,8 @@ flowchart TB
   CMP --> LAKE
   PIPE --> CMP
   PIPE --> LIN
+  SEM --> OBJ
+  SEM --> LIN
   LAKE --> MINIO["MinIO / S3"]
   LAKE --> NESSIE["Nessie Catalog"]
   NESSIE --> ICE["Apache Iceberg Tables"]
@@ -129,6 +133,17 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8040/docs`
 - Health: `http://localhost:8040/health`
 
+### Semantic Control
+
+Path: [services/semantic-control](services/semantic-control)
+
+Semantic Control connects analytics engineering to the Object Layer. It registers dbt projects, imports dbt `manifest.json`/`catalog.json`/`run_results.json`, maps dbt sources and models to dataset records, converts dbt tests into data contracts with run statuses, carries dbt docs into object/property descriptions, emits model-level OpenLineage events, validates object mappings (primary keys, duplicate API names, broken links, type mismatches, interfaces), promotes dbt models into Object Type backing tables, and syncs metadata to the local catalog with an optional DataHub boundary.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8050/docs`
+- Health: `http://localhost:8050/health`
+
 ## Local Development
 
 ### Prerequisites
@@ -162,6 +177,7 @@ This starts:
 - Ingestion Control
 - Compute Control
 - Pipeline Control
+- Semantic Control
 
 Stop the stack:
 

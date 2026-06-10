@@ -206,6 +206,33 @@ services:
       org.cognimesh.module: "7"
       org.cognimesh.description: "Pipeline IR, visual DAG backend, compilers, preview, versions, exports, and lineage"
 
+  semantic-control:
+    build:
+      context: ../../services/semantic-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_SEMANTIC_STATE_PATH: /var/lib/cognimesh/semantic-control/semantic.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_PIPELINE_CONTROL_URL: http://pipeline-control:8040
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+      COGNIMESH_DATAHUB_GMS_URL: ${COGNIMESH_DATAHUB_GMS_URL:-http://datahub-gms:8080}
+      COGNIMESH_DATAHUB_ENABLED: ${COGNIMESH_DATAHUB_ENABLED:-false}
+    ports:
+      - "${COGNIMESH_SEMANTIC_CONTROL_PORT:-8050}:8050"
+    volumes:
+      - cognimesh-semantic-control-state:/var/lib/cognimesh/semantic-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      pipeline-control:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "8"
+      org.cognimesh.description: "Semantic modeling, dbt artifact import, data contracts, object mappings, and catalog sync API"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -259,3 +286,4 @@ volumes:
   cognimesh-ingestion-control-state:
   cognimesh-compute-control-state:
   cognimesh-pipeline-control-state:
+  cognimesh-semantic-control-state:

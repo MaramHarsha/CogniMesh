@@ -48,6 +48,9 @@ jobs:
           - name: pipeline-control
             service: services/pipeline-control
             modules: "7"
+          - name: semantic-control
+            service: services/semantic-control
+            modules: "8"
     steps:
       - name: Checkout
         uses: actions/checkout@v6

@@ -5,3 +5,4 @@ resources:
   - ingestion.yaml
   - compute.yaml
   - pipeline.yaml
+  - semantic.yaml

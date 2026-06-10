@@ -953,7 +953,7 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, 5, 4, 6, and 7 are complete. Module 8 Semantic Modeling And dbt Integration is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, and 8 are complete. Module 9 Object Query Service is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
@@ -964,7 +964,7 @@ Current status: Modules 0, 1, 2, 10, 5, 4, 6, and 7 are complete. Module 8 Seman
 | 5 | Lakehouse Storage And Versioning | Complete | 0, 2, 10 | MinIO/S3, Iceberg, Nessie, snapshots, branches |
 | 6 | Compute And Query Engines | Complete | 5 | DuckDB, Spark, Trino, execution profiles |
 | 7 | Pipeline Builder And Code Workspaces | Complete | 1, 5, 6, 10 | Visual DAG, pipeline IR, dbt/Spark/SQL compilers |
-| 8 | Semantic Modeling And dbt Integration | Not Started | 1, 6, 7, 10 | dbt import, object mapping, data contracts |
+| 8 | Semantic Modeling And dbt Integration | Complete | 1, 6, 7, 10 | dbt import, object mapping, data contracts |
 | 9 | Object Query Service | Not Started | 1, 2, 6, 8 | Governed object-set query API |
 | 10 | Lineage And Provenance Ledger | Complete | 0, 1, 2 | OpenLineage events, graph, hash ledger |
 | 11 | Data Quality And Contracts | Not Started | 5, 7, 8, 10 | Assertions, tests, freshness, anomaly checks |
@@ -1707,7 +1707,7 @@ Use this table during implementation. Update it at the end of every module.
 | 5 Lakehouse | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 6 Compute | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 7 Pipeline Builder | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
-| 8 Semantic/dbt | No | No | No | No | No | No | No | Not Started |
+| 8 Semantic/dbt | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 9 Object Query | No | No | No | No | No | No | No | Not Started |
 | 10 Lineage | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 11 Quality | No | No | No | No | No | No | No | Not Started |
