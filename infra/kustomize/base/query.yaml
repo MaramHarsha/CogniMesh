@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: query-service-state
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: query-service
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: query-service
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: query-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cognimesh
+      app.kubernetes.io/component: query-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cognimesh
+        app.kubernetes.io/component: query-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: query-service
+          image: cognimesh/query-service:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8060
+          env:
+            - name: COGNIMESH_ENV
+              value: kubernetes
+            - name: COGNIMESH_SERVICE_NAME
+              value: cognimesh-query-service
+            - name: COGNIMESH_ALLOW_DEV_AUTH
+              value: "false"
+            - name: COGNIMESH_QUERY_STATE_PATH
+              value: /var/lib/cognimesh/query-service/query.db
+            - name: COGNIMESH_TRINO_CATALOG
+              value: iceberg
+            - name: COGNIMESH_OBJECT_REGISTRY_URL
+              value: http://object-registry:8000
+            - name: COGNIMESH_SEMANTIC_CONTROL_URL
+              value: http://semantic-control:8050
+            - name: COGNIMESH_COMPUTE_CONTROL_URL
+              value: http://compute-control:8030
+            - name: COGNIMESH_LINEAGE_ENDPOINT_URL
+              value: http://object-registry:8000/v1/lineage/openlineage
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: query-state
+              mountPath: /var/lib/cognimesh/query-service
+      volumes:
+        - name: query-state
+          persistentVolumeClaim:
+            claimName: query-service-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: query-service
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: query-service
+spec:
+  selector:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: query-service
+  ports:
+    - name: http
+      port: 8060
+      targetPort: http

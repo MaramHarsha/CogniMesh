@@ -233,6 +233,35 @@ services:
       org.cognimesh.module: "8"
       org.cognimesh.description: "Semantic modeling, dbt artifact import, data contracts, object mappings, and catalog sync API"
 
+  query-service:
+    build:
+      context: ../../services/query-service
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_QUERY_STATE_PATH: /var/lib/cognimesh/query-service/query.db
+      COGNIMESH_QUERY_DEFAULT_LIMIT: ${COGNIMESH_QUERY_DEFAULT_LIMIT:-100}
+      COGNIMESH_QUERY_MAX_LIMIT: ${COGNIMESH_QUERY_MAX_LIMIT:-1000}
+      COGNIMESH_QUERY_CACHE_TTL_SECONDS: ${COGNIMESH_QUERY_CACHE_TTL_SECONDS:-300}
+      COGNIMESH_TRINO_CATALOG: ${COGNIMESH_TRINO_CATALOG:-iceberg}
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_SEMANTIC_CONTROL_URL: http://semantic-control:8050
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+    ports:
+      - "${COGNIMESH_QUERY_SERVICE_PORT:-8060}:8060"
+    volumes:
+      - cognimesh-query-service-state:/var/lib/cognimesh/query-service
+    depends_on:
+      object-registry:
+        condition: service_started
+      semantic-control:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "9"
+      org.cognimesh.description: "Governed object-set query API with policy rewrite, masking, audit, caching, REST, and GraphQL"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -287,3 +316,4 @@ volumes:
   cognimesh-compute-control-state:
   cognimesh-pipeline-control-state:
   cognimesh-semantic-control-state:
+  cognimesh-query-service-state:

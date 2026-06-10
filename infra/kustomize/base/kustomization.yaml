@@ -6,3 +6,4 @@ resources:
   - compute.yaml
   - pipeline.yaml
   - semantic.yaml
+  - query.yaml

@@ -32,8 +32,9 @@ CogniMesh is early but runnable locally. The completed modules are:
 | 6 Compute And Query Engines | Complete | Compute Control API, DuckDB local adapter contract, SQLite compatibility fallback, Spark-on-Kubernetes planning, Trino/Iceberg planning, execution profiles, job runs, results, logs, retries, cost metadata, OpenLineage payloads |
 | 7 Pipeline Builder And Code Workspaces | Complete | Pipeline Control API, Pipeline IR, visual DAG backend, SQL/dbt/PySpark compilers, local preview runtime, quality results, run lineage, versions, promotion, Git-reviewable exports, workspace templates |
 | 8 Semantic Modeling And dbt Integration | Complete | Semantic Control API, dbt manifest/catalog/run_results import, dataset mapping, data contracts from dbt tests, dbt docs propagation, model lineage events, object mappings, validation rules, interfaces, shared value types, catalog sync |
+| 9 Object Query Service | Complete | Object Query Language, SQL plan compilers (SQLite/DuckDB/Postgres/Trino), link traversal joins, search-around, aggregations, purpose checks, row-level policy rewrite, column masking, property suppression, query audit, result caching, REST and GraphQL object data APIs |
 
-Next module in build order: **Module 9 Object Query Service**.
+Next module in build order: **Module 11 Data Quality And Contracts**.
 
 Modules not listed as complete are still planned work. See [plan.md](plan.md) for the full A-to-Z roadmap and tracking table.
 
@@ -50,6 +51,7 @@ flowchart TB
   API --> CMP["Compute Control\nEngines, Jobs, Results"]
   API --> PIPE["Pipeline Control\nDAGs, IR, Compilers"]
   API --> SEM["Semantic Control\ndbt Import, Contracts, Mappings"]
+  API --> OQS["Object Query Service\nOQL, Policy Rewrite, Masking"]
   API --> LAKE["Lakehouse Control\nCatalogs, Branches, Snapshots"]
   ING --> LIN
   ING --> LAKE
@@ -59,6 +61,8 @@ flowchart TB
   PIPE --> LIN
   SEM --> OBJ
   SEM --> LIN
+  OQS --> OBJ
+  OQS --> ID
   LAKE --> MINIO["MinIO / S3"]
   LAKE --> NESSIE["Nessie Catalog"]
   NESSIE --> ICE["Apache Iceberg Tables"]
@@ -144,6 +148,18 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8050/docs`
 - Health: `http://localhost:8050/health`
 
+### Object Query Service
+
+Path: [services/query-service](services/query-service)
+
+The Object Query Service makes semantic objects queryable without exposing raw schemas. It accepts Object Query Language requests against object API names, compiles them into inspectable SQL plans for SQLite, DuckDB, Postgres, and Trino, enforces purpose-based access before execution, rewrites row-level policy filters into the SQL, masks and suppresses governed properties, traverses links via joins and search-around, supports aggregations and safe pagination, audits every decision, caches results, and serves both REST and GraphQL object data APIs.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8060/docs`
+- GraphQL: `http://localhost:8060/graphql`
+- Health: `http://localhost:8060/health`
+
 ## Local Development
 
 ### Prerequisites
@@ -178,6 +194,7 @@ This starts:
 - Compute Control
 - Pipeline Control
 - Semantic Control
+- Object Query Service
 
 Stop the stack:
 

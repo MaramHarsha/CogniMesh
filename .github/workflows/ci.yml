@@ -51,6 +51,9 @@ jobs:
           - name: semantic-control
             service: services/semantic-control
             modules: "8"
+          - name: query-service
+            service: services/query-service
+            modules: "9"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
