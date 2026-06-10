@@ -30,8 +30,9 @@ CogniMesh is early but runnable locally. The completed modules are:
 | 5 Lakehouse Storage And Versioning | Complete | MinIO/S3 config, Nessie/Iceberg catalog config, Lakehouse Control API, branches, commits, merges, table snapshots, object bindings, retention, compaction, cost metadata, Kustomize base |
 | 4 Data Connection And Ingestion | Complete | Ingestion Control API, connector catalogue, source definitions, local CSV/JSON/Parquet-pointer ingestion, sample API ingestion, Postgres CDC events, schema drift, retryable runs, OpenLineage payloads, Compose and Kustomize wiring |
 | 6 Compute And Query Engines | Complete | Compute Control API, DuckDB local adapter contract, SQLite compatibility fallback, Spark-on-Kubernetes planning, Trino/Iceberg planning, execution profiles, job runs, results, logs, retries, cost metadata, OpenLineage payloads |
+| 7 Pipeline Builder And Code Workspaces | Complete | Pipeline Control API, Pipeline IR, visual DAG backend, SQL/dbt/PySpark compilers, local preview runtime, quality results, run lineage, versions, promotion, Git-reviewable exports, workspace templates |
 
-Next module in build order: **Module 7 Pipeline Builder And Code Workspaces**.
+Next module in build order: **Module 8 Semantic Modeling And dbt Integration**.
 
 Modules not listed as complete are still planned work. See [plan.md](plan.md) for the full A-to-Z roadmap and tracking table.
 
@@ -46,11 +47,14 @@ flowchart TB
   API --> LIN["Lineage Ledger\nEvents, Graph, Hash Chain"]
   API --> ING
   API --> CMP["Compute Control\nEngines, Jobs, Results"]
+  API --> PIPE["Pipeline Control\nDAGs, IR, Compilers"]
   API --> LAKE["Lakehouse Control\nCatalogs, Branches, Snapshots"]
   ING --> LIN
   ING --> LAKE
   CMP --> LIN
   CMP --> LAKE
+  PIPE --> CMP
+  PIPE --> LIN
   LAKE --> MINIO["MinIO / S3"]
   LAKE --> NESSIE["Nessie Catalog"]
   NESSIE --> ICE["Apache Iceberg Tables"]
@@ -114,6 +118,17 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8030/docs`
 - Health: `http://localhost:8030/health`
 
+### Pipeline Control
+
+Path: [services/pipeline-control](services/pipeline-control)
+
+Pipeline Control manages the low-code and code-native pipeline layer. It stores Pipeline IR DAGs, validates node graphs, compiles to SQL, dbt, and PySpark, previews sample data locally, records pipeline runs with quality results and lineage, versions and promotes pipeline definitions, and exports Git-reviewable workspaces.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8040/docs`
+- Health: `http://localhost:8040/health`
+
 ## Local Development
 
 ### Prerequisites
@@ -146,6 +161,7 @@ This starts:
 - Lakehouse Control
 - Ingestion Control
 - Compute Control
+- Pipeline Control
 
 Stop the stack:
 
@@ -170,6 +186,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module2:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module4:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module5:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module6:check
+powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module7:check
 powershell -ExecutionPolicy Bypass -File .\scripts\of.ps1 module10:check
 ```
 
@@ -261,6 +278,19 @@ GET /v1/compute/runs/{run_id}/lineage
 POST /v1/compute/runs/{run_id}/retry
 ```
 
+Pipelines:
+
+```http
+GET /v1/pipelines/workspace-templates
+POST /v1/pipelines
+GET /v1/pipelines/{pipeline_id}/validate
+POST /v1/pipelines/{pipeline_id}/compile
+POST /v1/pipelines/{pipeline_id}/preview
+POST /v1/pipelines/{pipeline_id}/runs
+POST /v1/pipelines/{pipeline_id}/promote
+POST /v1/pipelines/{pipeline_id}/export
+```
+
 ## Repository Layout
 
 ```text
@@ -285,8 +315,8 @@ Recommended build order from [plan.md](plan.md):
 5. Lakehouse Storage And Versioning: complete
 6. Data Connection And Ingestion: complete
 7. Compute And Query Engines: complete
-8. Pipeline Builder And Code Workspaces: next
-9. Semantic Modeling And dbt Integration
+8. Pipeline Builder And Code Workspaces: complete
+9. Semantic Modeling And dbt Integration: next
 10. Object Query Service
 11. Data Quality And Contracts
 12. Low-Code App Builder Integration
@@ -324,6 +354,7 @@ Key docs:
 - [Lakehouse storage and versioning](docs/architecture/lakehouse-storage-versioning.md)
 - [Data connection and ingestion](docs/architecture/data-connection-ingestion.md)
 - [Compute and query engines](docs/architecture/compute-query-engines.md)
+- [Pipeline builder and code workspaces](docs/architecture/pipeline-builder-code-workspaces.md)
 - [Local development](docs/engineering/local-development.md)
 - [Dependency and license policy](docs/engineering/dependency-license-policy.md)
 - [Security policy](SECURITY.md)

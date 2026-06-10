@@ -4,3 +4,4 @@ resources:
   - lakehouse.yaml
   - ingestion.yaml
   - compute.yaml
+  - pipeline.yaml

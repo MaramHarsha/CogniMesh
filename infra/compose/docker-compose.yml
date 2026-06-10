@@ -179,6 +179,33 @@ services:
       org.cognimesh.module: "6"
       org.cognimesh.description: "Compute engine profiles, local SQL execution, Spark/Trino planning, results, retries, and lineage"
 
+  pipeline-control:
+    build:
+      context: ../../services/pipeline-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_PIPELINE_STATE_PATH: /var/lib/cognimesh/pipeline-control/pipeline.db
+      COGNIMESH_PIPELINE_EXPORT_ROOT: /var/lib/cognimesh/pipeline-control/exports
+      COGNIMESH_PIPELINE_ORCHESTRATOR: ${COGNIMESH_PIPELINE_ORCHESTRATOR:-argo}
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+      COGNIMESH_LAKEHOUSE_CONTROL_URL: http://lakehouse-control:8010
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+    ports:
+      - "${COGNIMESH_PIPELINE_CONTROL_PORT:-8040}:8040"
+    volumes:
+      - cognimesh-pipeline-control-state:/var/lib/cognimesh/pipeline-control
+    depends_on:
+      compute-control:
+        condition: service_started
+      lakehouse-control:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "7"
+      org.cognimesh.description: "Pipeline IR, visual DAG backend, compilers, preview, versions, exports, and lineage"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -231,3 +258,4 @@ volumes:
   cognimesh-lakehouse-control-state:
   cognimesh-ingestion-control-state:
   cognimesh-compute-control-state:
+  cognimesh-pipeline-control-state:

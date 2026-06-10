@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipeline-control-state
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: pipeline-control
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: pipeline-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cognimesh
+      app.kubernetes.io/component: pipeline-control
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cognimesh
+        app.kubernetes.io/component: pipeline-control
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: pipeline-control
+          image: cognimesh/pipeline-control:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8040
+          env:
+            - name: COGNIMESH_ENV
+              value: kubernetes
+            - name: COGNIMESH_SERVICE_NAME
+              value: cognimesh-pipeline-control
+            - name: COGNIMESH_ALLOW_DEV_AUTH
+              value: "false"
+            - name: COGNIMESH_PIPELINE_STATE_PATH
+              value: /var/lib/cognimesh/pipeline-control/pipeline.db
+            - name: COGNIMESH_PIPELINE_EXPORT_ROOT
+              value: /var/lib/cognimesh/pipeline-control/exports
+            - name: COGNIMESH_PIPELINE_ORCHESTRATOR
+              value: argo
+            - name: COGNIMESH_COMPUTE_CONTROL_URL
+              value: http://compute-control:8030
+            - name: COGNIMESH_LAKEHOUSE_CONTROL_URL
+              value: http://lakehouse-control:8010
+            - name: COGNIMESH_OBJECT_REGISTRY_URL
+              value: http://object-registry:8000
+            - name: COGNIMESH_LINEAGE_ENDPOINT_URL
+              value: http://object-registry:8000/v1/lineage/openlineage
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: pipeline-state
+              mountPath: /var/lib/cognimesh/pipeline-control
+      volumes:
+        - name: pipeline-state
+          persistentVolumeClaim:
+            claimName: pipeline-control-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipeline-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: pipeline-control
+spec:
+  selector:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: pipeline-control
+  ports:
+    - name: http
+      port: 8040
+      targetPort: http
