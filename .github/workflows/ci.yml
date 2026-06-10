@@ -26,6 +26,48 @@ jobs:
       - name: Validate repository foundation
         run: python scripts/validate_foundation.py
 
+  module-gates:
+    name: Module gates (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: object-registry
+            service: services/object-registry
+            modules: "1 2 10"
+          - name: ingestion-control
+            service: services/ingestion-control
+            modules: "4"
+          - name: lakehouse-control
+            service: services/lakehouse-control
+            modules: "5"
+          - name: compute-control
+            service: services/compute-control
+            modules: "6"
+          - name: pipeline-control
+            service: services/pipeline-control
+            modules: "7"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install service dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "${{ matrix.service }}[test]"
+
+      - name: Run module validation gates
+        run: |
+          for module in ${{ matrix.modules }}; do
+            python "scripts/validate_module${module}.py"
+          done
+
   dependency-review:
     name: Dependency review
     if: github.event_name == 'pull_request'
