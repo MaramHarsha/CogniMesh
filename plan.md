@@ -953,7 +953,7 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, and 9 are complete. Module 11 Data Quality And Contracts is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, and 11 are complete. Module 13 Low-Code App Builder Integration is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
@@ -967,7 +967,7 @@ Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, and 9 are complete. Module 1
 | 8 | Semantic Modeling And dbt Integration | Complete | 1, 6, 7, 10 | dbt import, object mapping, data contracts |
 | 9 | Object Query Service | Complete | 1, 2, 6, 8 | Governed object-set query API |
 | 10 | Lineage And Provenance Ledger | Complete | 0, 1, 2 | OpenLineage events, graph, hash ledger |
-| 11 | Data Quality And Contracts | Not Started | 5, 7, 8, 10 | Assertions, tests, freshness, anomaly checks |
+| 11 | Data Quality And Contracts | Complete | 5, 7, 8, 10 | Assertions, tests, freshness, anomaly checks |
 | 12 | Actions, Writeback, And Functions | Not Started | 1, 2, 9, 10 | Governed edits, rules, approvals, function runtime |
 | 13 | Low-Code App Builder Integration | Not Started | 2, 9, 12 | Appsmith/Streamlit integrations and templates |
 | 14 | Object Explorer, Object Views, And Analytics | Not Started | 9, 13 | Object search, detail pages, charts, saved analyses |
@@ -1710,7 +1710,7 @@ Use this table during implementation. Update it at the end of every module.
 | 8 Semantic/dbt | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 9 Object Query | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 10 Lineage | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
-| 11 Quality | No | No | No | No | No | No | No | Not Started |
+| 11 Quality | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 12 Actions | No | No | No | No | No | No | No | Not Started |
 | 13 App Builder | No | No | No | No | No | No | No | Not Started |
 | 14 Object Explorer | No | No | No | No | No | No | No | Not Started |

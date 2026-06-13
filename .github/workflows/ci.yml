@@ -54,6 +54,9 @@ jobs:
           - name: query-service
             service: services/query-service
             modules: "9"
+          - name: quality-control
+            service: services/quality-control
+            modules: "11"
     steps:
       - name: Checkout
         uses: actions/checkout@v6

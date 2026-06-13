@@ -262,6 +262,30 @@ services:
       org.cognimesh.module: "9"
       org.cognimesh.description: "Governed object-set query API with policy rewrite, masking, audit, caching, REST, and GraphQL"
 
+  quality-control:
+    build:
+      context: ../../services/quality-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_QUALITY_STATE_PATH: /var/lib/cognimesh/quality-control/quality.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_SEMANTIC_CONTROL_URL: http://semantic-control:8050
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+    ports:
+      - "${COGNIMESH_QUALITY_CONTROL_PORT:-8070}:8070"
+    volumes:
+      - cognimesh-quality-control-state:/var/lib/cognimesh/quality-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      semantic-control:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "11"
+      org.cognimesh.description: "Data Quality And Contracts control plane service"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -317,3 +341,4 @@ volumes:
   cognimesh-pipeline-control-state:
   cognimesh-semantic-control-state:
   cognimesh-query-service-state:
+  cognimesh-quality-control-state:

@@ -33,8 +33,9 @@ CogniMesh is early but runnable locally. The completed modules are:
 | 7 Pipeline Builder And Code Workspaces | Complete | Pipeline Control API, Pipeline IR, visual DAG backend, SQL/dbt/PySpark compilers, local preview runtime, quality results, run lineage, versions, promotion, Git-reviewable exports, workspace templates |
 | 8 Semantic Modeling And dbt Integration | Complete | Semantic Control API, dbt manifest/catalog/run_results import, dataset mapping, data contracts from dbt tests, dbt docs propagation, model lineage events, object mappings, validation rules, interfaces, shared value types, catalog sync |
 | 9 Object Query Service | Complete | Object Query Language, SQL plan compilers (SQLite/DuckDB/Postgres/Trino), link traversal joins, search-around, aggregations, purpose checks, row-level policy rewrite, column masking, property suppression, query audit, result caching, REST and GraphQL object data APIs |
+| 11 Data Quality And Contracts | Complete | Quality Control API, data contracts for datasets and object types, built-in checks (not null, unique, accepted values, relationship integrity, freshness, row count bounds, schema match), quality runs with history, promotion/action gates, failure alerts with auto-resolution, and quality scores |
 
-Next module in build order: **Module 11 Data Quality And Contracts**.
+Next module in build order: **Module 13 Low-Code App Builder Integration**.
 
 Modules not listed as complete are still planned work. See [plan.md](plan.md) for the full A-to-Z roadmap and tracking table.
 
@@ -52,6 +53,7 @@ flowchart TB
   API --> PIPE["Pipeline Control\nDAGs, IR, Compilers"]
   API --> SEM["Semantic Control\ndbt Import, Contracts, Mappings"]
   API --> OQS["Object Query Service\nOQL, Policy Rewrite, Masking"]
+  API --> QC["Quality Control\nContracts, Runs, Gates, Scores"]
   API --> LAKE["Lakehouse Control\nCatalogs, Branches, Snapshots"]
   ING --> LIN
   ING --> LAKE
@@ -63,6 +65,8 @@ flowchart TB
   SEM --> LIN
   OQS --> OBJ
   OQS --> ID
+  QC --> SEM
+  QC --> LIN
   LAKE --> MINIO["MinIO / S3"]
   LAKE --> NESSIE["Nessie Catalog"]
   NESSIE --> ICE["Apache Iceberg Tables"]
@@ -160,6 +164,17 @@ Local endpoints:
 - GraphQL: `http://localhost:8060/graphql`
 - Health: `http://localhost:8060/health`
 
+### Quality Control
+
+Path: [services/quality-control](services/quality-control)
+
+Quality Control prevents bad data from silently becoming trusted semantic objects. It registers data contracts for datasets and object types, evaluates built-in checks (not null, unique, accepted values, relationship integrity, freshness, row count bounds, schema match), records quality runs with history and per-contract status, enforces promotion and action gates, raises alerts on failures with automatic resolution when checks pass again, and exposes a quality score per asset for catalog and object views.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8070/docs`
+- Health: `http://localhost:8070/health`
+
 ## Local Development
 
 ### Prerequisites
@@ -195,6 +210,7 @@ This starts:
 - Pipeline Control
 - Semantic Control
 - Object Query Service
+- Quality Control
 
 Stop the stack:
 

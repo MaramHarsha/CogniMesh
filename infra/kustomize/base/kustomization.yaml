@@ -7,3 +7,4 @@ resources:
   - pipeline.yaml
   - semantic.yaml
   - query.yaml
+  - quality.yaml
