@@ -214,6 +214,19 @@ function Invoke-Module11Check {
   }
 }
 
+function Invoke-Module13Check {
+  $servicePython = Join-Path $Root "services/object-registry/.venv/Scripts/python.exe"
+  if (Test-Path -LiteralPath $servicePython) {
+    & $servicePython (Join-Path $Root "scripts/validate_module13.py")
+    if ($LASTEXITCODE -ne 0) {
+      throw "Module 13 validation failed with exit code $LASTEXITCODE."
+    }
+  }
+  else {
+    Invoke-Python -PythonArgs @((Join-Path $Root "scripts/validate_module13.py"))
+  }
+}
+
 switch ($Task) {
   "help" {
     Write-Host "CogniMesh task runner"
@@ -239,6 +252,7 @@ switch ($Task) {
     Write-Host "  module9:check Validate Module 9 object query service"
     Write-Host "  module10:check Validate Module 10 lineage and provenance ledger"
     Write-Host "  module11:check Validate Module 11 data quality and contracts"
+    Write-Host "  module13:check Validate Module 13 low-code app builder integration"
   }
   "setup" {
     New-Item -ItemType Directory -Force -Path (Join-Path $Root ".cognimesh") | Out-Null
@@ -277,6 +291,9 @@ switch ($Task) {
   }
   "module11:check" {
     Invoke-Module11Check
+  }
+  "module13:check" {
+    Invoke-Module13Check
   }
   "module1:install" {
     $serviceRoot = Join-Path $Root "services/object-registry"
@@ -330,6 +347,9 @@ switch ($Task) {
       if (Test-Path -LiteralPath (Join-Path $Root "services/quality-control")) {
         Invoke-Module11Check
       }
+      if (Test-Path -LiteralPath (Join-Path $Root "services/app-control")) {
+        Invoke-Module13Check
+      }
     }
     Write-Host "CogniMesh validation gates completed."
   }
@@ -356,11 +376,11 @@ switch ($Task) {
     }
   }
   "dev" {
-    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control")
+    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control", "app-control")
     Write-Host "CogniMesh developer environment started."
   }
   "compose:up" {
-    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control")
+    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control", "app-control")
   }
   "compose:down" {
     Invoke-Compose -ComposeArgs @("down")

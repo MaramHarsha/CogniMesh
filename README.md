@@ -34,8 +34,9 @@ CogniMesh is early but runnable locally. The completed modules are:
 | 8 Semantic Modeling And dbt Integration | Complete | Semantic Control API, dbt manifest/catalog/run_results import, dataset mapping, data contracts from dbt tests, dbt docs propagation, model lineage events, object mappings, validation rules, interfaces, shared value types, catalog sync |
 | 9 Object Query Service | Complete | Object Query Language, SQL plan compilers (SQLite/DuckDB/Postgres/Trino), link traversal joins, search-around, aggregations, purpose checks, row-level policy rewrite, column masking, property suppression, query audit, result caching, REST and GraphQL object data APIs |
 | 11 Data Quality And Contracts | Complete | Quality Control API, data contracts for datasets and object types, built-in checks (not null, unique, accepted values, relationship integrity, freshness, row count bounds, schema match), quality runs with history, promotion/action gates, failure alerts with auto-resolution, and quality scores |
+| 13 Low-Code App Builder Integration | Complete | App Control API, app registry (workspace/purpose/owner/data dependencies), deployment policy gate over the Object Layer, app-level audit logs, object-aware UI component contracts, Appsmith datasource + example templates, Streamlit example, and a Python SDK |
 
-Next module in build order: **Module 13 Low-Code App Builder Integration**.
+Next module in build order: **Module 14 Object Explorer, Object Views, And Analytics**.
 
 Modules not listed as complete are still planned work. See [plan.md](plan.md) for the full A-to-Z roadmap and tracking table.
 
@@ -54,6 +55,7 @@ flowchart TB
   API --> SEM["Semantic Control\ndbt Import, Contracts, Mappings"]
   API --> OQS["Object Query Service\nOQL, Policy Rewrite, Masking"]
   API --> QC["Quality Control\nContracts, Runs, Gates, Scores"]
+  API --> APP["App Control\nApp Registry, Deploy Gate, Audit"]
   API --> LAKE["Lakehouse Control\nCatalogs, Branches, Snapshots"]
   ING --> LIN
   ING --> LAKE
@@ -67,6 +69,8 @@ flowchart TB
   OQS --> ID
   QC --> SEM
   QC --> LIN
+  APP --> OQS
+  APP --> ID
   LAKE --> MINIO["MinIO / S3"]
   LAKE --> NESSIE["Nessie Catalog"]
   NESSIE --> ICE["Apache Iceberg Tables"]
@@ -175,6 +179,17 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8070/docs`
 - Health: `http://localhost:8070/health`
 
+### App Control
+
+Path: [services/app-control](services/app-control)
+
+App Control is the low-code app builder integration boundary. It maintains an app registry (name, workspace, purpose, owner, data dependencies, deployment URL), enforces a deployment policy gate that checks an app's declared object dependencies against the Object Layer before activation, records app-level audit logs, and registers object-aware UI component contracts. Reusable assets live in [apps/appsmith-templates](apps/appsmith-templates) and [apps/streamlit-examples](apps/streamlit-examples), and the [Python SDK](packages/sdk-python) gives apps a typed client over the Object Query Service and app registry.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8090/docs`
+- Health: `http://localhost:8090/health`
+
 ## Local Development
 
 ### Prerequisites
@@ -211,6 +226,7 @@ This starts:
 - Semantic Control
 - Object Query Service
 - Quality Control
+- App Control
 
 Stop the stack:
 

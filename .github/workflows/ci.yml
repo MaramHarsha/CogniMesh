@@ -57,6 +57,9 @@ jobs:
           - name: quality-control
             service: services/quality-control
             modules: "11"
+          - name: app-control
+            service: services/app-control
+            modules: "13"
     steps:
       - name: Checkout
         uses: actions/checkout@v6

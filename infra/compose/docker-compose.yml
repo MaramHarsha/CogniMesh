@@ -286,6 +286,29 @@ services:
       org.cognimesh.module: "11"
       org.cognimesh.description: "Data Quality And Contracts control plane service"
 
+  app-control:
+    build:
+      context: ../../services/app-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_APP_STATE_PATH: /var/lib/cognimesh/app-control/app.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+    ports:
+      - "${COGNIMESH_APP_CONTROL_PORT:-8090}:8090"
+    volumes:
+      - cognimesh-app-control-state:/var/lib/cognimesh/app-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      query-service:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "13"
+      org.cognimesh.description: "Low-Code App Registry Control Plane API"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -342,3 +365,5 @@ volumes:
   cognimesh-semantic-control-state:
   cognimesh-query-service-state:
   cognimesh-quality-control-state:
+  cognimesh-app-control-state:
+

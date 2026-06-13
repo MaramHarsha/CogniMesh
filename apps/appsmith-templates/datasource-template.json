@@ -1,0 +1,25 @@
+{
+  "name": "CogniMesh OQS",
+  "pluginId": "restapi-plugin",
+  "datasourceConfiguration": {
+    "url": "http://query-service:8060",
+    "headers": [
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "key": "X-CogniMesh-Actor",
+        "value": "appsmith-dev"
+      },
+      {
+        "key": "X-CogniMesh-Roles",
+        "value": "analyst,app_builder"
+      },
+      {
+        "key": "X-CogniMesh-Purpose",
+        "value": "analytics"
+      }
+    ]
+  }
+}

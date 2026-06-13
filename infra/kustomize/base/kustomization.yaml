@@ -8,3 +8,5 @@ resources:
   - semantic.yaml
   - query.yaml
   - quality.yaml
+  - app.yaml
+

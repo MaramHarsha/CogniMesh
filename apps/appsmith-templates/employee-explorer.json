@@ -1,0 +1,70 @@
+{
+  "exportFormatVersion": 1,
+  "application": {
+    "name": "CogniMesh Employee Explorer",
+    "pages": [
+      {
+        "name": "Explorer Page",
+        "isDefault": true,
+        "layouts": [
+          {
+            "viewMode": false,
+            "dsl": {
+              "widgetName": "MainContainer",
+              "widgetId": "0",
+              "type": "CONTAINER_WIDGET",
+              "children": [
+                {
+                  "widgetName": "TitleHeader",
+                  "type": "TEXT_WIDGET",
+                  "text": "CogniMesh Employee Explorer Dashboard",
+                  "fontSize": "24px",
+                  "fontStyle": "BOLD",
+                  "bottomRow": 4,
+                  "leftColumn": 1
+                },
+                {
+                  "widgetName": "SearchInput",
+                  "type": "INPUT_WIDGET",
+                  "placeholderText": "Search employees...",
+                  "bottomRow": 8,
+                  "leftColumn": 1,
+                  "rightColumn": 24
+                },
+                {
+                  "widgetName": "EmployeeTable",
+                  "type": "TABLE_WIDGET_V2",
+                  "tableData": "{{GetEmployees.data.rows}}",
+                  "columns": [
+                    { "headerText": "ID", "id": "id" },
+                    { "headerText": "First Name", "id": "first_name" },
+                    { "headerText": "Last Name", "id": "last_name" },
+                    { "headerText": "Department", "id": "departmentId" },
+                    { "headerText": "Status", "id": "employmentStatus" }
+                  ],
+                  "bottomRow": 45,
+                  "leftColumn": 1,
+                  "rightColumn": 64
+                }
+              ]
+            }
+          }
+        ],
+        "queries": [
+          {
+            "name": "GetEmployees",
+            "pluginType": "API",
+            "actionConfiguration": {
+              "path": "/v1/query/objects",
+              "httpMethod": "POST",
+              "body": "{\n  \"from\": \"Employee\",\n  \"select\": [\"id\", \"first_name\", \"last_name\", \"departmentId\", \"employmentStatus\"],\n  \"where\": {\n    \"employmentStatus\": \"ACTIVE\"\n  },\n  \"search\": \"{{SearchInput.text}}\",\n  \"limit\": 50\n}",
+              "headers": [
+                { "key": "Content-Type", "value": "application/json" }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

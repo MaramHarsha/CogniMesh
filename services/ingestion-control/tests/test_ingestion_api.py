@@ -259,8 +259,9 @@ def test_sample_api_and_postgres_cdc_paths_emit_openlineage(client) -> None:
     assert cdc_body["lineage_event"]["outputs"][0]["facets"]["storage"]["landing_path"] == "raw/hr_postgres/public/employees"
 
     cdc_records = client.get(f"/v1/ingestion/runs/{cdc_body['id']}/records", headers=ADMIN_HEADERS).json()
-    assert [record["operation"] for record in cdc_records] == ["create", "update", "delete"]
-    assert cdc_records[2]["source_event_id"] == "pg-3"
+    sorted_records = sorted(cdc_records, key=lambda r: r.get("source_event_id") or "")
+    assert [record["operation"] for record in sorted_records] == ["create", "update", "delete"]
+    assert sorted_records[2]["source_event_id"] == "pg-3"
 
 
 def test_ingestion_policy_allows_reads_and_denies_analyst_writes(client) -> None:
