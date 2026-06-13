@@ -403,11 +403,10 @@ def main() -> None:
     Base.metadata.create_all(bind=engine)
     with SessionLocal() as session:
         result = seed_employee_domain(session)
-    # Log only the asset labels and a count, not the identifier values. The seed
-    # creates a source system carrying a connection URI, so the resulting records
-    # are treated as sensitive; printing their values would write that to logs.
+    # The seed creates a source system carrying a connection URI, so every record
+    # in `result` is treated as sensitive. Log only the count (an int, which does
+    # not carry the sensitive data) and never the records themselves.
     print(f"Seeded Employee domain: created {len(result)} assets.")
-    print("Assets: " + ", ".join(sorted(result.keys())))
 
 
 if __name__ == "__main__":
