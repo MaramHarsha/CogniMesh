@@ -309,6 +309,22 @@ services:
       org.cognimesh.module: "13"
       org.cognimesh.description: "Low-Code App Registry Control Plane API"
 
+  console:
+    build:
+      context: ../../apps/console
+    ports:
+      - "${COGNIMESH_CONSOLE_PORT:-3000}:3000"
+    volumes:
+      - ../../apps/console/src:/app/src
+    depends_on:
+      object-registry:
+        condition: service_started
+      query-service:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "14"
+      org.cognimesh.description: "CogniMesh Native UI Console"
+
   neo4j:
     image: neo4j:5-community
     profiles:

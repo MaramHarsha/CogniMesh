@@ -970,7 +970,7 @@ Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, and 13 are complete. 
 | 11 | Data Quality And Contracts | Complete | 5, 7, 8, 10 | Assertions, tests, freshness, anomaly checks |
 | 12 | Actions, Writeback, And Functions | Not Started | 1, 2, 9, 10 | Governed edits, rules, approvals, function runtime |
 | 13 | Low-Code App Builder Integration | Complete | 2, 9, 12 | Appsmith/Streamlit integrations and templates |
-| 14 | Object Explorer, Object Views, And Analytics | Not Started | 9, 13 | Object search, detail pages, charts, saved analyses |
+| 14 | Object Explorer, Object Views, And Analytics | Complete | 9, 13 | Object search, detail pages, charts, saved analyses |
 | 15 | ML And Model Lifecycle | Not Started | 5, 6, 8, 9, 10 | MLflow, serving, evaluation, retraining |
 | 16 | Planning, Optimization, And AI Tooling | Not Started | 9, 12, 15 | Scenario planning, optimization, object-aware tools |
 | 17 | Advanced Governance And Compliance | Not Started | 2, 9, 10, 11 | PBAC propagation, row/column/cell controls, evidence |
