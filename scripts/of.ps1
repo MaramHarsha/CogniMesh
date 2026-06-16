@@ -253,6 +253,32 @@ function Invoke-Module14Check {
   }
 }
 
+function Invoke-Module15Check {
+  $servicePython = Join-Path $Root "services/object-registry/.venv/Scripts/python.exe"
+  if (Test-Path -LiteralPath $servicePython) {
+    & $servicePython (Join-Path $Root "scripts/validate_module15.py")
+    if ($LASTEXITCODE -ne 0) {
+      throw "Module 15 validation failed with exit code $LASTEXITCODE."
+    }
+  }
+  else {
+    Invoke-Python -PythonArgs @((Join-Path $Root "scripts/validate_module15.py"))
+  }
+}
+
+function Invoke-Module16Check {
+  $servicePython = Join-Path $Root "services/object-registry/.venv/Scripts/python.exe"
+  if (Test-Path -LiteralPath $servicePython) {
+    & $servicePython (Join-Path $Root "scripts/validate_module16.py")
+    if ($LASTEXITCODE -ne 0) {
+      throw "Module 16 validation failed with exit code $LASTEXITCODE."
+    }
+  }
+  else {
+    Invoke-Python -PythonArgs @((Join-Path $Root "scripts/validate_module16.py"))
+  }
+}
+
 switch ($Task) {
   "help" {
     Write-Host "CogniMesh task runner"
@@ -281,6 +307,8 @@ switch ($Task) {
     Write-Host "  module12:check Validate Module 12 actions, writeback, and functions"
     Write-Host "  module13:check Validate Module 13 low-code app builder integration"
     Write-Host "  module14:check Validate Module 14 object explorer, object views, and analytics"
+    Write-Host "  module15:check Validate Module 15 ML and model lifecycle"
+    Write-Host "  module16:check Validate Module 16 planning, optimization, and AI tooling"
   }
   "setup" {
     New-Item -ItemType Directory -Force -Path (Join-Path $Root ".cognimesh") | Out-Null
@@ -325,6 +353,12 @@ switch ($Task) {
   }
   "module13:check" {
     Invoke-Module13Check
+  }
+  "module15:check" {
+    Invoke-Module15Check
+  }
+  "module16:check" {
+    Invoke-Module16Check
   }
   "module14:check" {
     Invoke-Module14Check
@@ -390,6 +424,12 @@ switch ($Task) {
       if (Test-Path -LiteralPath (Join-Path $Root "apps/console")) {
         Invoke-Module14Check
       }
+      if (Test-Path -LiteralPath (Join-Path $Root "services/ml-control")) {
+        Invoke-Module15Check
+      }
+      if (Test-Path -LiteralPath (Join-Path $Root "services/planning-control")) {
+        Invoke-Module16Check
+      }
     }
     Write-Host "CogniMesh validation gates completed."
   }
@@ -416,11 +456,11 @@ switch ($Task) {
     }
   }
   "dev" {
-    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control", "action-control", "app-control", "console")
+    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control", "action-control", "app-control", "console", "ml-control", "planning-control")
     Write-Host "CogniMesh developer environment started."
   }
   "compose:up" {
-    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control", "action-control", "app-control", "console")
+    Invoke-Compose -ComposeArgs @("up", "-d", "--build", "postgres", "object-registry", "minio", "nessie", "lakehouse-control", "ingestion-control", "compute-control", "pipeline-control", "semantic-control", "query-service", "quality-control", "action-control", "app-control", "console", "ml-control", "planning-control")
   }
   "compose:down" {
     Invoke-Compose -ComposeArgs @("down")

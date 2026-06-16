@@ -953,7 +953,7 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, 13, 14, and 12 are complete. Module 15 ML And Model Lifecycle is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, 13, 14, 12, and 15 are complete. Module 16 Planning, Optimization, And AI Tooling and Module 17 Advanced Governance And Compliance are next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
@@ -971,8 +971,8 @@ Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, 13, 14, and 12 are co
 | 12 | Actions, Writeback, And Functions | Complete | 1, 2, 9, 10 | Governed edits, rules, approvals, function runtime |
 | 13 | Low-Code App Builder Integration | Complete | 2, 9, 12 | Appsmith/Streamlit integrations and templates |
 | 14 | Object Explorer, Object Views, And Analytics | Complete | 9, 13 | Object search, detail pages, charts, saved analyses |
-| 15 | ML And Model Lifecycle | Not Started | 5, 6, 8, 9, 10 | MLflow, serving, evaluation, retraining |
-| 16 | Planning, Optimization, And AI Tooling | Not Started | 9, 12, 15 | Scenario planning, optimization, object-aware tools |
+| 15 | ML And Model Lifecycle | Complete | 5, 6, 8, 9, 10 | MLflow, serving, evaluation, retraining |
+| 16 | Planning, Optimization, And AI Tooling | Complete | 9, 12, 15 | Scenario planning, optimization, object-aware tools |
 | 17 | Advanced Governance And Compliance | Not Started | 2, 9, 10, 11 | PBAC propagation, row/column/cell controls, evidence |
 | 18 | Kubernetes Production Platform | Not Started | 0-17 as needed | Helm, GitOps, HA, autoscaling, network policy |
 | 19 | SDKs, CLI, And Developer Experience | Not Started | 1, 9, 12 | Python/TypeScript SDKs, CLI, API docs |
@@ -1714,8 +1714,8 @@ Use this table during implementation. Update it at the end of every module.
 | 12 Actions | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 13 App Builder | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 14 Object Explorer | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
-| 15 ML Lifecycle | No | No | No | No | No | No | No | Not Started |
-| 16 Planning/AI | No | No | No | No | No | No | No | Not Started |
+| 15 ML Lifecycle | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 16 Planning/AI | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 17 Advanced Governance | No | No | No | No | No | No | No | Not Started |
 | 18 Kubernetes Platform | No | No | No | No | No | No | No | Not Started |
 | 19 SDKs/CLI | No | No | No | No | No | No | No | Not Started |

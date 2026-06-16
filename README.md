@@ -201,6 +201,28 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8090/docs`
 - Health: `http://localhost:8090/health`
 
+### ML Control
+
+Path: [services/ml-control](services/ml-control)
+
+ML Control is the ML and model lifecycle control plane. It governs the journey from training to production serving and wires every step into the object layer, lineage graph, and audit ledger: experiments scoped to object types (optionally synced to an MLflow tracking server), training runs with parameters/metrics/artifacts, a versioned model registry with a governed stage lifecycle (`staging → approved → production → archived`), serving endpoints with audit-logged predictions, batch scoring jobs with optional prediction writeback, evaluation reports, drift records that can trigger retraining, and retraining configs. Every resource creation emits an OpenLineage-style event and every state change is audit-logged.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8100/docs`
+- Health: `http://localhost:8100/health`
+
+### Planning Control
+
+Path: [services/planning-control](services/planning-control)
+
+Planning Control is the planning, optimization, and AI tooling control plane. It enables operational decision workflows through planning scenarios (with branching), Monte Carlo / outcome simulations, optimization jobs (objective functions, constraints, Python/OR-Tools adapters), an agent tool registry with guardrailed AI tool execution and prompt/tool-chain auditing, sessions, and workflow evaluation suites. State changes are audit-logged.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8110/docs`
+- Health: `http://localhost:8110/health`
+
 ## Local Development
 
 ### Prerequisites

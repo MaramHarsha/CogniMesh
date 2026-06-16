@@ -1,0 +1,23 @@
+[project]
+name = "cognimesh-ml-control"
+version = "0.1.0"
+description = "CogniMesh ML And Model Lifecycle control plane"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115,<1.0",
+  "httpx>=0.27,<1.0",
+  "pydantic>=2.7,<3.0",
+  "uvicorn[standard]>=0.30,<1.0",
+  "mlflow-skinny>=2.14,<3.0",
+]
+
+[project.optional-dependencies]
+test = [
+  "httpx>=0.27,<1.0",
+  "pytest>=8.0,<10.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+tmp_path_retention_policy = "none"

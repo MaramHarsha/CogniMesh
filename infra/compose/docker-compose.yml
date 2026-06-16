@@ -348,6 +348,78 @@ services:
       org.cognimesh.module: "14"
       org.cognimesh.description: "CogniMesh Native UI Console"
 
+  ml-control:
+    build:
+      context: ../../services/ml-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_ML_STATE_PATH: /var/lib/cognimesh/ml-control/ml.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+      COGNIMESH_MLFLOW_TRACKING_URI: ${COGNIMESH_MLFLOW_TRACKING_URI:-http://mlflow:5000}
+      COGNIMESH_MLFLOW_ENABLED: ${COGNIMESH_MLFLOW_ENABLED:-false}
+    ports:
+      - "${COGNIMESH_ML_CONTROL_PORT:-8100}:8100"
+    volumes:
+      - cognimesh-ml-control-state:/var/lib/cognimesh/ml-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      query-service:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "15"
+      org.cognimesh.description: "ML And Model Lifecycle control plane (experiments, runs, registry, serving, drift, retraining)"
+
+  planning-control:
+    build:
+      context: ../../services/planning-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_PLANNING_STATE_PATH: /var/lib/cognimesh/planning-control/planning.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+    ports:
+      - "${COGNIMESH_PLANNING_CONTROL_PORT:-8110}:8110"
+    volumes:
+      - cognimesh-planning-control-state:/var/lib/cognimesh/planning-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      query-service:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "16"
+      org.cognimesh.description: "Planning, Optimization, and AI Tooling control plane (scenarios, simulations, optimizations, agent tools, sessions, evaluations)"
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.14.3
+    profiles:
+      - mlflow
+    command:
+      - mlflow
+      - server
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - /var/lib/mlflow/mlruns
+      - --default-artifact-root
+      - /var/lib/mlflow/artifacts
+    ports:
+      - "${COGNIMESH_MLFLOW_PORT:-5000}:5000"
+    volumes:
+      - cognimesh-mlflow-data:/var/lib/mlflow
+    labels:
+      org.cognimesh.module: "15"
+      org.cognimesh.description: "Optional MLflow tracking server (enable with --profile mlflow)"
+
   neo4j:
     image: neo4j:5-community
     profiles:
@@ -406,4 +478,6 @@ volumes:
   cognimesh-quality-control-state:
   cognimesh-action-control-state:
   cognimesh-app-control-state:
-
+  cognimesh-ml-control-state:
+  cognimesh-planning-control-state:
+  cognimesh-mlflow-data:

@@ -63,6 +63,12 @@ jobs:
           - name: app-control
             service: services/app-control
             modules: "13"
+          - name: ml-control
+            service: services/ml-control
+            modules: "15"
+          - name: planning-control
+            service: services/planning-control
+            modules: "16"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
