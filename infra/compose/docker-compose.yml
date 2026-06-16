@@ -286,6 +286,29 @@ services:
       org.cognimesh.module: "11"
       org.cognimesh.description: "Data Quality And Contracts control plane service"
 
+  action-control:
+    build:
+      context: ../../services/action-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_ACTION_STATE_PATH: /var/lib/cognimesh/action-control/action.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+    ports:
+      - "${COGNIMESH_ACTION_CONTROL_PORT:-8080}:8080"
+    volumes:
+      - cognimesh-action-control-state:/var/lib/cognimesh/action-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      query-service:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "12"
+      org.cognimesh.description: "Actions, Writeback, And Functions control plane service"
+
   app-control:
     build:
       context: ../../services/app-control
@@ -381,5 +404,6 @@ volumes:
   cognimesh-semantic-control-state:
   cognimesh-query-service-state:
   cognimesh-quality-control-state:
+  cognimesh-action-control-state:
   cognimesh-app-control-state:
 

@@ -57,6 +57,9 @@ jobs:
           - name: quality-control
             service: services/quality-control
             modules: "11"
+          - name: action-control
+            service: services/action-control
+            modules: "12"
           - name: app-control
             service: services/app-control
             modules: "13"

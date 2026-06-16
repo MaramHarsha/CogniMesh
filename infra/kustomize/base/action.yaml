@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: action-control-state
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: action-control
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: action-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: action-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cognimesh
+      app.kubernetes.io/component: action-control
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cognimesh
+        app.kubernetes.io/component: action-control
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: action-control
+          image: cognimesh/action-control:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: COGNIMESH_ENV
+              value: kubernetes
+            - name: COGNIMESH_SERVICE_NAME
+              value: cognimesh-action-control
+            - name: COGNIMESH_ALLOW_DEV_AUTH
+              value: "false"
+            - name: COGNIMESH_ACTION_STATE_PATH
+              value: /var/lib/cognimesh/action-control/action.db
+            - name: COGNIMESH_OBJECT_REGISTRY_URL
+              value: http://object-registry:8000
+            - name: COGNIMESH_QUERY_SERVICE_URL
+              value: http://query-service:8060
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: action-state
+              mountPath: /var/lib/cognimesh/action-control
+      volumes:
+        - name: action-state
+          persistentVolumeClaim:
+            claimName: action-control-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: action-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: action-control
+spec:
+  selector:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: action-control
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

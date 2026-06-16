@@ -953,7 +953,7 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, and 13 are complete. Module 14 Object Explorer, Object Views, And Analytics is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, 13, 14, and 12 are complete. Module 15 ML And Model Lifecycle is next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
@@ -968,7 +968,7 @@ Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, and 13 are complete. 
 | 9 | Object Query Service | Complete | 1, 2, 6, 8 | Governed object-set query API |
 | 10 | Lineage And Provenance Ledger | Complete | 0, 1, 2 | OpenLineage events, graph, hash ledger |
 | 11 | Data Quality And Contracts | Complete | 5, 7, 8, 10 | Assertions, tests, freshness, anomaly checks |
-| 12 | Actions, Writeback, And Functions | Not Started | 1, 2, 9, 10 | Governed edits, rules, approvals, function runtime |
+| 12 | Actions, Writeback, And Functions | Complete | 1, 2, 9, 10 | Governed edits, rules, approvals, function runtime |
 | 13 | Low-Code App Builder Integration | Complete | 2, 9, 12 | Appsmith/Streamlit integrations and templates |
 | 14 | Object Explorer, Object Views, And Analytics | Complete | 9, 13 | Object search, detail pages, charts, saved analyses |
 | 15 | ML And Model Lifecycle | Not Started | 5, 6, 8, 9, 10 | MLflow, serving, evaluation, retraining |
@@ -1711,9 +1711,9 @@ Use this table during implementation. Update it at the end of every module.
 | 9 Object Query | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 10 Lineage | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 11 Quality | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
-| 12 Actions | No | No | No | No | No | No | No | Not Started |
+| 12 Actions | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 13 App Builder | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
-| 14 Object Explorer | No | No | No | No | No | No | No | Not Started |
+| 14 Object Explorer | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 15 ML Lifecycle | No | No | No | No | No | No | No | Not Started |
 | 16 Planning/AI | No | No | No | No | No | No | No | Not Started |
 | 17 Advanced Governance | No | No | No | No | No | No | No | Not Started |

@@ -179,6 +179,17 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8070/docs`
 - Health: `http://localhost:8070/health`
 
+### Action Control
+
+Path: [services/action-control](services/action-control)
+
+Action Control turns the read-oriented Object Layer into an operational system. It registers governed action types (parameter schema, business rules, writeback target, optional approval gate), validates submissions against permissions, purpose, required fields, business rules, and an optional custom validation function, and applies changes through a writeback target (object edits, function, webhook, or queue). It runs Python functions in a restricted sandbox (TypeScript functions are registered for an external runner), supports idempotency keys, records audit and OpenLineage-style lineage events for every applied/approved/rejected/reverted submission, and supports compensating rollback of applied edits.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8080/docs`
+- Health: `http://localhost:8080/health`
+
 ### App Control
 
 Path: [services/app-control](services/app-control)
