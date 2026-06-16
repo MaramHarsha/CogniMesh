@@ -93,6 +93,36 @@ jobs:
         with:
           fail-on-severity: high
 
+  console:
+    name: Console build (Module 14)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/console/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install console dependencies
+        working-directory: apps/console
+        run: npm ci
+
+      - name: Build console
+        working-directory: apps/console
+        run: npm run build
+
+      - name: Run module validation gate
+        run: python scripts/validate_module14.py
+
   docker-template:
     name: Docker template build
     runs-on: ubuntu-latest
