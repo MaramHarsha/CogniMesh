@@ -1,7 +1,485 @@
 global:
-  environment: development
+  environment: production
   imagePullPolicy: IfNotPresent
 
-foundation:
+ingress:
   enabled: true
+  className: nginx
+  hosts:
+    - host: cognimesh.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backend:
+            service: console
+            port: 3000
+        - path: /v1/query
+          pathType: ImplementationSpecific
+          backend:
+            service: query-service
+            port: 8060
+        - path: /v1/registry
+          pathType: ImplementationSpecific
+          backend:
+            service: object-registry
+            port: 8000
 
+services:
+  # ---------------------------------------------------- Database & Infra
+  postgres:
+    enabled: true
+    port: 5432
+    replicaCount: 1
+    image:
+      repository: postgres
+      tag: 16-alpine
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    persistence:
+      enabled: true
+      size: 10Gi
+      mountPath: /var/lib/postgresql/data
+    env:
+      POSTGRES_USER: cognimesh
+      POSTGRES_PASSWORD: cognimesh-secure-pass
+      POSTGRES_DB: cognimesh_registry
+
+  minio:
+    enabled: true
+    port: 9000
+    replicaCount: 1
+    image:
+      repository: quay.io/minio/minio
+      tag: latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    persistence:
+      enabled: true
+      size: 10Gi
+      mountPath: /data
+    env:
+      MINIO_ROOT_USER: cognimesh
+      MINIO_ROOT_PASSWORD: cognimesh-secret
+
+  nessie:
+    enabled: true
+    port: 19120
+    replicaCount: 1
+    image:
+      repository: ghcr.io/projectnessie/nessie
+      tag: 0.107.6
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: false
+
+  mlflow:
+    enabled: true
+    port: 5000
+    replicaCount: 1
+    image:
+      repository: ghcr.io/mlflow/mlflow
+      tag: v2.14.3
+    command: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--backend-store-uri", "/var/lib/mlflow/mlruns", "--default-artifact-root", "/var/lib/mlflow/artifacts"]
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/mlflow
+    env:
+      AWS_ACCESS_KEY_ID: cognimesh
+      AWS_SECRET_ACCESS_KEY: cognimesh-secret
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+
+  keycloak:
+    enabled: true
+    port: 8080
+    replicaCount: 1
+    image:
+      repository: quay.io/keycloak/keycloak
+      tag: 26.0
+    command: ["start-dev"]
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    persistence:
+      enabled: false
+    env:
+      KC_HTTP_PORT: "8080"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: cognimesh-secure-pass
+
+  # ---------------------------------------------------- CogniMesh Services
+  object-registry:
+    enabled: true
+    port: 8000
+    replicaCount: 1
+    image:
+      repository: cognimesh/object-registry
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: false
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_DATABASE_URL: "postgresql+psycopg://cognimesh:cognimesh-secure-pass@postgres:5432/cognimesh_registry"
+      COGNIMESH_ALLOW_DEV_AUTH: "false"
+
+  lakehouse-control:
+    enabled: true
+    port: 8010
+    replicaCount: 1
+    image:
+      repository: cognimesh/lakehouse-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/lakehouse-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_LAKEHOUSE_STATE_PATH: /var/lib/cognimesh/lakehouse-control/lakehouse.db
+      COGNIMESH_LAKEHOUSE_WAREHOUSE_URI: s3://cognimesh-lakehouse/warehouse
+      COGNIMESH_S3_ENDPOINT_URL: http://minio:9000
+      COGNIMESH_S3_BUCKET: cognimesh-lakehouse
+      COGNIMESH_S3_ACCESS_KEY: cognimesh
+      COGNIMESH_S3_SECRET_KEY: cognimesh-secret
+      COGNIMESH_S3_REGION: us-east-1
+      COGNIMESH_NESSIE_URI: http://nessie:19120/api/v2
+      COGNIMESH_ICEBERG_REST_URI: http://nessie:19120/iceberg
+      COGNIMESH_STORAGE_COST_PER_GB_MONTH: "0.023"
+
+  ingestion-control:
+    enabled: true
+    port: 8020
+    replicaCount: 1
+    image:
+      repository: cognimesh/ingestion-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/ingestion-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_INGESTION_STATE_PATH: /var/lib/cognimesh/ingestion-control/ingestion.db
+      COGNIMESH_LAKEHOUSE_CONTROL_URL: http://lakehouse-control:8010
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  compute-control:
+    enabled: true
+    port: 8030
+    replicaCount: 1
+    image:
+      repository: cognimesh/compute-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/compute-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_COMPUTE_STATE_PATH: /var/lib/cognimesh/compute-control/compute.db
+      COGNIMESH_LAKEHOUSE_CONTROL_URL: http://lakehouse-control:8010
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  pipeline-control:
+    enabled: true
+    port: 8040
+    replicaCount: 1
+    image:
+      repository: cognimesh/pipeline-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/pipeline-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_PIPELINE_STATE_PATH: /var/lib/cognimesh/pipeline-control/pipeline.db
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+      COGNIMESH_LAKEHOUSE_CONTROL_URL: http://lakehouse-control:8010
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  semantic-control:
+    enabled: true
+    port: 8050
+    replicaCount: 1
+    image:
+      repository: cognimesh/semantic-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/semantic-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_SEMANTIC_STATE_PATH: /var/lib/cognimesh/semantic-control/semantic.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_PIPELINE_CONTROL_URL: http://pipeline-control:8040
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  query-service:
+    enabled: true
+    port: 8060
+    replicaCount: 1
+    image:
+      repository: cognimesh/query-service
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/query-service
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_QUERY_STATE_PATH: /var/lib/cognimesh/query-service/query.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_SEMANTIC_CONTROL_URL: http://semantic-control:8050
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  quality-control:
+    enabled: true
+    port: 8070
+    replicaCount: 1
+    image:
+      repository: cognimesh/quality-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/quality-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_QUALITY_STATE_PATH: /var/lib/cognimesh/quality-control/quality.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_SEMANTIC_CONTROL_URL: http://semantic-control:8050
+      COGNIMESH_COMPUTE_CONTROL_URL: http://compute-control:8030
+
+  action-control:
+    enabled: true
+    port: 8080
+    replicaCount: 1
+    image:
+      repository: cognimesh/action-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/action-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_ACTION_STATE_PATH: /var/lib/cognimesh/action-control/action.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+
+  app-control:
+    enabled: true
+    port: 8090
+    replicaCount: 1
+    image:
+      repository: cognimesh/app-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/app-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_APP_STATE_PATH: /var/lib/cognimesh/app-control/app.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+
+  ml-control:
+    enabled: true
+    port: 8100
+    replicaCount: 1
+    image:
+      repository: cognimesh/ml-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/ml-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_ML_STATE_PATH: /var/lib/cognimesh/ml-control/ml.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+      COGNIMESH_MLFLOW_TRACKING_URI: http://mlflow:5000
+      COGNIMESH_MLFLOW_ENABLED: "true"
+
+  planning-control:
+    enabled: true
+    port: 8110
+    replicaCount: 1
+    image:
+      repository: cognimesh/planning-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/planning-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_PLANNING_STATE_PATH: /var/lib/cognimesh/planning-control/planning.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  governance-control:
+    enabled: true
+    port: 8120
+    replicaCount: 1
+    image:
+      repository: cognimesh/governance-control
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /var/lib/cognimesh/governance-control
+    env:
+      COGNIMESH_ENV: kubernetes
+      COGNIMESH_GOVERNANCE_STATE_PATH: /var/lib/cognimesh/governance-control/governance.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+
+  console:
+    enabled: true
+    port: 3000
+    replicaCount: 1
+    image:
+      repository: cognimesh/console
+      tag: 0.1.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    persistence:
+      enabled: false

@@ -77,7 +77,7 @@ def test_contract_crud(client) -> None:
 
     # delete contract
     del_res = client.delete(f"/v1/quality/contracts/{contract['id']}", headers=ENGINEER_HEADERS)
-    assert del_res.status_code == 204
+    assert del_res.status_code == 200
 
     # assert deleted
     get_res_deleted = client.get(f"/v1/quality/contracts/{contract['id']}", headers=ANALYST_HEADERS)

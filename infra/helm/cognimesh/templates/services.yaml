@@ -1,0 +1,22 @@
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "cognimesh.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ $service.port }}
+      targetPort: service-port
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "cognimesh.selectorLabels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+---
+{{- end }}
+{{- end }}

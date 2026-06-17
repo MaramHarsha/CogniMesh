@@ -1,0 +1,6 @@
+id,first_name,last_name,email,salary,status
+emp_001,John,Doe,john.doe@company.com,120000,ACTIVE
+emp_002,Jane,Smith,jane.smith@company.com,135000,ACTIVE
+emp_003,Bob,Johnson,bob.johnson@company.com,95000,ACTIVE
+emp_004,Alice,Williams,alice.williams@company.com,150000,ACTIVE
+emp_005,Charlie,Brown,charlie.brown@company.com,80000,TERMINATED

@@ -1,0 +1,207 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:790103ee-19de-43a9-ae9b-09029ddb9224",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "name": "cognimesh",
+      "version": "0.1.0",
+      "type": "application"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "lucide-react",
+      "version": "1.18.0",
+      "purl": "pkg:npm/lucide-react@1.18.0"
+    },
+    {
+      "type": "library",
+      "name": "react",
+      "version": "19.2.6",
+      "purl": "pkg:npm/react@19.2.6"
+    },
+    {
+      "type": "library",
+      "name": "react-dom",
+      "version": "19.2.6",
+      "purl": "pkg:npm/react-dom@19.2.6"
+    },
+    {
+      "type": "library",
+      "name": "react-router-dom",
+      "version": "7.17.0",
+      "purl": "pkg:npm/react-router-dom@7.17.0"
+    },
+    {
+      "type": "library",
+      "name": "@eslint/js",
+      "version": "10.0.1",
+      "purl": "pkg:npm/@eslint/js@10.0.1"
+    },
+    {
+      "type": "library",
+      "name": "@types/node",
+      "version": "24.12.3",
+      "purl": "pkg:npm/@types/node@24.12.3"
+    },
+    {
+      "type": "library",
+      "name": "@types/react",
+      "version": "19.2.14",
+      "purl": "pkg:npm/@types/react@19.2.14"
+    },
+    {
+      "type": "library",
+      "name": "@types/react-dom",
+      "version": "19.2.3",
+      "purl": "pkg:npm/@types/react-dom@19.2.3"
+    },
+    {
+      "type": "library",
+      "name": "@vitejs/plugin-react",
+      "version": "6.0.1",
+      "purl": "pkg:npm/@vitejs/plugin-react@6.0.1"
+    },
+    {
+      "type": "library",
+      "name": "eslint",
+      "version": "10.3.0",
+      "purl": "pkg:npm/eslint@10.3.0"
+    },
+    {
+      "type": "library",
+      "name": "eslint-plugin-react-hooks",
+      "version": "7.1.1",
+      "purl": "pkg:npm/eslint-plugin-react-hooks@7.1.1"
+    },
+    {
+      "type": "library",
+      "name": "eslint-plugin-react-refresh",
+      "version": "0.5.2",
+      "purl": "pkg:npm/eslint-plugin-react-refresh@0.5.2"
+    },
+    {
+      "type": "library",
+      "name": "globals",
+      "version": "17.6.0",
+      "purl": "pkg:npm/globals@17.6.0"
+    },
+    {
+      "type": "library",
+      "name": "typescript",
+      "version": "6.0.2",
+      "purl": "pkg:npm/typescript@6.0.2"
+    },
+    {
+      "type": "library",
+      "name": "typescript-eslint",
+      "version": "8.59.2",
+      "purl": "pkg:npm/typescript-eslint@8.59.2"
+    },
+    {
+      "type": "library",
+      "name": "vite",
+      "version": "8.0.12",
+      "purl": "pkg:npm/vite@8.0.12"
+    },
+    {
+      "type": "library",
+      "name": "httpx",
+      "version": "0.27",
+      "purl": "pkg:pip/httpx@0.27"
+    },
+    {
+      "type": "library",
+      "name": "pytest",
+      "version": "8.0",
+      "purl": "pkg:pip/pytest@8.0"
+    },
+    {
+      "type": "library",
+      "name": "@types/node",
+      "version": "20.0.0",
+      "purl": "pkg:npm/@types/node@20.0.0"
+    },
+    {
+      "type": "library",
+      "name": "ts-node",
+      "version": "10.9.2",
+      "purl": "pkg:npm/ts-node@10.9.2"
+    },
+    {
+      "type": "library",
+      "name": "typescript",
+      "version": "5.4.5",
+      "purl": "pkg:npm/typescript@5.4.5"
+    },
+    {
+      "type": "library",
+      "name": "fastapi",
+      "version": "0.115",
+      "purl": "pkg:pip/fastapi@0.115"
+    },
+    {
+      "type": "library",
+      "name": "pydantic",
+      "version": "2.7",
+      "purl": "pkg:pip/pydantic@2.7"
+    },
+    {
+      "type": "library",
+      "name": "uvicorn",
+      "version": "0.30",
+      "purl": "pkg:pip/uvicorn@0.30"
+    },
+    {
+      "type": "library",
+      "name": "duckdb",
+      "version": "1.1",
+      "purl": "pkg:pip/duckdb@1.1"
+    },
+    {
+      "type": "library",
+      "name": "mlflow-skinny",
+      "version": "2.14",
+      "purl": "pkg:pip/mlflow-skinny@2.14"
+    },
+    {
+      "type": "library",
+      "name": "alembic",
+      "version": "1.13",
+      "purl": "pkg:pip/alembic@1.13"
+    },
+    {
+      "type": "library",
+      "name": "casbin",
+      "version": "1.36",
+      "purl": "pkg:pip/casbin@1.36"
+    },
+    {
+      "type": "library",
+      "name": "PyJWT",
+      "version": "2.9",
+      "purl": "pkg:pip/PyJWT@2.9"
+    },
+    {
+      "type": "library",
+      "name": "psycopg",
+      "version": "3.2",
+      "purl": "pkg:pip/psycopg@3.2"
+    },
+    {
+      "type": "library",
+      "name": "sqlalchemy",
+      "version": "2.0",
+      "purl": "pkg:pip/sqlalchemy@2.0"
+    },
+    {
+      "type": "library",
+      "name": "strawberry-graphql",
+      "version": "0.250",
+      "purl": "pkg:pip/strawberry-graphql@0.250"
+    }
+  ]
+}

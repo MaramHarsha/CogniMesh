@@ -51,7 +51,7 @@ def _execute_duckdb(sql: str, input_tables: list[dict[str, Any]], limit: int) ->
                     [tuple(row.get(name) for name, _ in columns) for row in rows],
                 )
             logs.append(f"Loaded {len(rows)} rows into temporary table {table['name']}.")
-        result = connection.execute(f"SELECT * FROM ({sql}) AS cognimesh_preview LIMIT {int(limit)}").fetchall()
+        result = connection.execute(f"SELECT * FROM ({sql}) AS cognimesh_preview LIMIT {int(limit)}").fetchall()  # noqa: S608 - user-provided sql wrapper
         column_names = [item[0] for item in connection.description or []]
         rows = [dict(zip(column_names, row, strict=False)) for row in result]
         logs.append(f"Produced {len(rows)} rows.")
@@ -80,7 +80,7 @@ def _execute_sqlite(sql: str, input_tables: list[dict[str, Any]], limit: int) ->
                     [tuple(row.get(name) for name, _ in columns) for row in rows],
                 )
             logs.append(f"Loaded {len(rows)} rows into temporary table {table['name']}.")
-        result = connection.execute(f"SELECT * FROM ({sql}) AS cognimesh_preview LIMIT ?", (int(limit),)).fetchall()
+        result = connection.execute(f"SELECT * FROM ({sql}) AS cognimesh_preview LIMIT ?", (int(limit),)).fetchall()  # noqa: S608 - user-provided sql wrapper
         rows = [dict(row) for row in result]
         logs.append(f"Produced {len(rows)} rows.")
         return LocalSqlResult(rows=rows, engine_used="sqlite_compat", duckdb_available=False, logs=logs)

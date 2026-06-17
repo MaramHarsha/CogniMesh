@@ -1,0 +1,17 @@
+{
+  "name": "cognimesh-sdk-ts",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for CogniMesh platform",
+  "main": "dist/client.js",
+  "types": "dist/client.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/tests/**/*.test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

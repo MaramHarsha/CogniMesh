@@ -88,6 +88,10 @@ class CogniMeshClient:
         self,
         query_service_url: str | None = None,
         app_control_url: str | None = None,
+        object_registry_url: str | None = None,
+        action_control_url: str | None = None,
+        pipeline_control_url: str | None = None,
+        governance_control_url: str | None = None,
         actor: str | None = None,
         roles: list[str] | tuple[str, ...] | None = None,
         purpose: str | None = None,
@@ -95,6 +99,10 @@ class CogniMeshClient:
     ) -> None:
         self.query_service_url = (query_service_url or "http://localhost:8060").rstrip("/")
         self.app_control_url = (app_control_url or "http://localhost:8090").rstrip("/")
+        self.object_registry_url = (object_registry_url or "http://localhost:8000").rstrip("/")
+        self.action_control_url = (action_control_url or "http://localhost:8080").rstrip("/")
+        self.pipeline_control_url = (pipeline_control_url or "http://localhost:8040").rstrip("/")
+        self.governance_control_url = (governance_control_url or "http://localhost:8120").rstrip("/")
         self.actor = actor
         self.roles = list(roles) if roles else []
         self.purpose = purpose or "analytics"
@@ -243,3 +251,75 @@ class CogniMeshClient:
         res = self._http_client.get(url, headers=self.get_headers())
         res.raise_for_status()
         return res.json()
+
+    # --- Object Registry API Operations
+
+    def register_object_type(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Register a new object type schema."""
+        url = f"{self.object_registry_url}/v1/object-types"
+        res = self._http_client.post(url, json=payload, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    def get_object_type(self, object_type_id: str) -> dict[str, Any]:
+        """Retrieve details of a registered object type schema by ID."""
+        url = f"{self.object_registry_url}/v1/object-types/{object_type_id}"
+        res = self._http_client.get(url, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    def list_object_types(self) -> list[dict[str, Any]]:
+        """List registered object types."""
+        url = f"{self.object_registry_url}/v1/object-types"
+        res = self._http_client.get(url, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    # --- Action Control Plane API Operations
+
+    def submit_action(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Submit a governed action execution request."""
+        url = f"{self.action_control_url}/v1/actions/submissions"
+        res = self._http_client.post(url, json=payload, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    def get_action_submission(self, submission_id: str) -> dict[str, Any]:
+        """Get the status of an action submission."""
+        url = f"{self.action_control_url}/v1/actions/submissions/{submission_id}"
+        res = self._http_client.get(url, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    # --- Lineage Ledger API Operations
+
+    def get_lineage(self, asset_kind: str, asset_id: str) -> list[dict[str, Any]]:
+        """Retrieve historical lineage events for an asset."""
+        url = f"{self.object_registry_url}/v1/lineage/{asset_kind}/{asset_id}"
+        res = self._http_client.get(url, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    def get_lineage_graph(self, asset_kind: str, asset_id: str) -> dict[str, Any]:
+        """Retrieve interactive lineage graph centered at a specific asset."""
+        url = f"{self.object_registry_url}/v1/lineage/graph/{asset_kind}/{asset_id}"
+        res = self._http_client.get(url, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    # --- Pipeline Control API Operations
+
+    def run_pipeline(self, pipeline_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Trigger an execution run of a data pipeline."""
+        url = f"{self.pipeline_control_url}/v1/pipelines/{pipeline_id}/runs"
+        res = self._http_client.post(url, json=payload, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+
+    def get_pipeline_run(self, run_id: str) -> dict[str, Any]:
+        """Get status of a pipeline run."""
+        url = f"{self.pipeline_control_url}/v1/pipelines/runs/{run_id}"
+        res = self._http_client.get(url, headers=self.get_headers())
+        res.raise_for_status()
+        return res.json()
+

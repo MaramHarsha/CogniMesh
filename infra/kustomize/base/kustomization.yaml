@@ -10,4 +10,8 @@ resources:
   - quality.yaml
   - action.yaml
   - app.yaml
+  - ml.yaml
+  - planning.yaml
+  - governance.yaml
+
 

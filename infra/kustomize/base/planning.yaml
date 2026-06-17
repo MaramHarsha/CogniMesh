@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: planning-control-state
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: planning-control
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planning-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: planning-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cognimesh
+      app.kubernetes.io/component: planning-control
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cognimesh
+        app.kubernetes.io/component: planning-control
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: planning-control
+          image: cognimesh/planning-control:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8110
+          env:
+            - name: COGNIMESH_ENV
+              value: kubernetes
+            - name: COGNIMESH_SERVICE_NAME
+              value: cognimesh-planning-control
+            - name: COGNIMESH_ALLOW_DEV_AUTH
+              value: "false"
+            - name: COGNIMESH_PLANNING_STATE_PATH
+              value: /var/lib/cognimesh/planning-control/planning.db
+            - name: COGNIMESH_OBJECT_REGISTRY_URL
+              value: http://object-registry:8000
+            - name: COGNIMESH_QUERY_SERVICE_URL
+              value: http://query-service:8060
+            - name: COGNIMESH_LINEAGE_ENDPOINT_URL
+              value: http://object-registry:8000/v1/lineage/openlineage
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: planning-state
+              mountPath: /var/lib/cognimesh/planning-control
+      volumes:
+        - name: planning-state
+          persistentVolumeClaim:
+            claimName: planning-control-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: planning-control
+  labels:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: planning-control
+spec:
+  selector:
+    app.kubernetes.io/name: cognimesh
+    app.kubernetes.io/component: planning-control
+  ports:
+    - name: http
+      port: 8110
+      targetPort: http

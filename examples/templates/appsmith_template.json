@@ -1,0 +1,29 @@
+{
+  "name": "Employee Registry Dashboard",
+  "widgets": [
+    {
+      "type": "TABLE_WIDGET",
+      "name": "EmployeeListTable",
+      "properties": {
+        "sourceData": "{{QueryServiceAPI.run()}}",
+        "columns": ["id", "first_name", "last_name", "email", "salary"]
+      }
+    },
+    {
+      "type": "BUTTON_WIDGET",
+      "name": "SubmitActionBtn",
+      "properties": {
+        "label": "Trigger Pay Increase",
+        "onClick": "{{ActionSubmitAPI.run()}}"
+      }
+    }
+  ],
+  "queries": [
+    {
+      "name": "QueryServiceAPI",
+      "url": "http://localhost:8060/v1/query/objects",
+      "method": "POST",
+      "body": "{\"from\": \"Employee\", \"select\": [\"id\", \"first_name\", \"last_name\", \"salary\"]}"
+    }
+  ]
+}

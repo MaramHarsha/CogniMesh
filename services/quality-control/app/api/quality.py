@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
 from app.core.security import RequestContext, authorize, get_request_context
 from app.models.quality import (
@@ -67,7 +67,7 @@ def get_contract(
     return _call(lambda: repository.get_contract(contract_id))
 
 
-@router.delete("/contracts/{contract_id}", status_code=204)
+@router.delete("/contracts/{contract_id}", status_code=200)
 def delete_contract(
     contract_id: str,
     repository: QualityRepository = Depends(get_repository),

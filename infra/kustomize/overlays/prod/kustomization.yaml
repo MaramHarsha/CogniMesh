@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+namespace: cognimesh-prod
+commonLabels:
+  environment: production
+patches:
+  # Scale replicas to 3 for query-service high-availability in production
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: query-service
+      spec:
+        replicas: 3
+    target:
+      kind: Deployment
+      name: query-service
+Spec:
+  replicas: 3

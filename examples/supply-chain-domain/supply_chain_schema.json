@@ -1,0 +1,11 @@
+{
+  "namespace_id": "logistics_domain",
+  "api_name": "Shipment",
+  "display_name": "Cargo Shipment",
+  "description": "Semantic model for cargo shipment packages",
+  "primary_key_property": "shipment_id",
+  "status": "active",
+  "allowed_purposes": ["analytics", "supply_chain_planning"],
+  "classification_tags": ["INTERNAL"],
+  "default_access": "read_metadata"
+}

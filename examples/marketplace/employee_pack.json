@@ -1,0 +1,17 @@
+{
+  "name": "employee_domain_pack",
+  "version": "1.0.0",
+  "type": "domain_object_pack",
+  "cognimesh_version": "0.1.0",
+  "dependencies": [],
+  "contents": {
+    "object_types": [
+      {
+        "namespace_id": "hr_domain",
+        "api_name": "Employee",
+        "display_name": "Employee Profile",
+        "primary_key_property": "id"
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "namespace_id": "retail_domain",
+  "api_name": "Order",
+  "display_name": "Customer Purchase Order",
+  "description": "Semantic model for online purchase orders",
+  "primary_key_property": "order_id",
+  "status": "active",
+  "allowed_purposes": ["analytics", "marketing"],
+  "classification_tags": ["PCI"],
+  "default_access": "read_metadata"
+}

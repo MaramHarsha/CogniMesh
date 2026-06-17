@@ -155,3 +155,132 @@ def test_client_log_audit(mock_post) -> None:
     args, kwargs = mock_post.call_args
     assert args[0] == "http://mock-app-control/v1/apps/capp_1/audit"
     assert kwargs["json"]["operation"] == "READ"
+
+
+@patch("httpx.Client.post")
+def test_client_object_registry(mock_post) -> None:
+    mock_post.return_value = MagicMock(
+        status_code=201,
+        json=lambda: {"id": "obj_1", "api_name": "Employee"},
+    )
+
+    client = CogniMeshClient(object_registry_url="http://mock-registry")
+    res = client.register_object_type({"api_name": "Employee"})
+    assert res["id"] == "obj_1"
+    mock_post.assert_called_once_with(
+        "http://mock-registry/v1/object-types",
+        json={"api_name": "Employee"},
+        headers={"X-CogniMesh-Purpose": "analytics"},
+    )
+
+
+@patch("httpx.Client.post")
+def test_client_submit_action(mock_post) -> None:
+    mock_post.return_value = MagicMock(
+        status_code=201,
+        json=lambda: {"id": "sub_1", "status": "applied"},
+    )
+
+    client = CogniMeshClient(action_control_url="http://mock-action")
+    res = client.submit_action({"action_type": "create_employee"})
+    assert res["id"] == "sub_1"
+    mock_post.assert_called_once_with(
+        "http://mock-action/v1/actions/submissions",
+        json={"action_type": "create_employee"},
+        headers={"X-CogniMesh-Purpose": "analytics"},
+    )
+
+
+@patch("httpx.Client.get")
+def test_client_lineage(mock_get) -> None:
+    mock_get.return_value = MagicMock(
+        status_code=200,
+        json=lambda: [{"id": "evt_1"}],
+    )
+
+    client = CogniMeshClient(object_registry_url="http://mock-registry")
+    res = client.get_lineage("object_type", "Employee")
+    assert len(res) == 1
+    mock_get.assert_called_once_with(
+        "http://mock-registry/v1/lineage/object_type/Employee",
+        headers={"X-CogniMesh-Purpose": "analytics"},
+    )
+
+
+@patch("httpx.Client.post")
+def test_client_run_pipeline(mock_post) -> None:
+    mock_post.return_value = MagicMock(
+        status_code=201,
+        json=lambda: {"run_id": "run_1"},
+    )
+
+    client = CogniMeshClient(pipeline_control_url="http://mock-pipeline")
+    res = client.run_pipeline("pipe_1", {"param": "val"})
+    assert res["run_id"] == "run_1"
+    mock_post.assert_called_once_with(
+        "http://mock-pipeline/v1/pipelines/pipe_1/runs",
+        json={"param": "val"},
+        headers={"X-CogniMesh-Purpose": "analytics"},
+    )
+
+
+# --- CLI tests
+import argparse
+from cognimesh.cli import handle_login, handle_workspace, handle_query, handle_lineage, handle_pipeline
+
+
+@patch("cognimesh.cli.save_config")
+def test_cli_login(mock_save) -> None:
+    args = argparse.Namespace(actor="admin1", roles="role1,role2", purpose="audit")
+    assert handle_login(args) == 0
+    mock_save.assert_called_once()
+    config = mock_save.call_args[0][0]
+    assert config["actor"] == "admin1"
+    assert config["roles"] == ["role1", "role2"]
+    assert config["purpose"] == "audit"
+
+
+@patch("cognimesh.cli.save_config")
+def test_cli_workspace(mock_save) -> None:
+    args = argparse.Namespace(id="ws-123")
+    assert handle_workspace(args) == 0
+    mock_save.assert_called_once()
+    config = mock_save.call_args[0][0]
+    assert config["workspace_id"] == "ws-123"
+
+
+@patch("cognimesh.client.CogniMeshClient.execute_query")
+def test_cli_query(mock_exec) -> None:
+    mock_exec.return_value = {"rows": []}
+    args = argparse.Namespace(
+        object_type="Employee",
+        select="id,name",
+        where=["status=ACTIVE"],
+        offset=0,
+        limit=10,
+    )
+    assert handle_query(args) == 0
+    mock_exec.assert_called_once_with({
+        "from": "Employee",
+        "select": ["id", "name"],
+        "where": {"status": "ACTIVE"},
+        "offset": 0,
+        "limit": 10,
+    })
+
+
+@patch("cognimesh.client.CogniMeshClient.get_lineage")
+def test_cli_lineage(mock_lineage) -> None:
+    mock_lineage.return_value = []
+    args = argparse.Namespace(kind="object_type", id="Employee", graph=False)
+    assert handle_lineage(args) == 0
+    mock_lineage.assert_called_once_with("object_type", "Employee")
+
+
+@patch("cognimesh.client.CogniMeshClient.run_pipeline")
+def test_cli_pipeline_run(mock_run) -> None:
+    mock_run.return_value = {"status": "started"}
+    args = argparse.Namespace(pipeline_cmd="run", id="pipe_123", file=None)
+    assert handle_pipeline(args) == 0
+    mock_run.assert_called_once_with("pipe_123", {})
+

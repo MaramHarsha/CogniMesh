@@ -1,0 +1,15 @@
+{
+  "name": "appsmith_template_pack",
+  "version": "1.0.0",
+  "type": "app_template",
+  "cognimesh_version": "0.1.0",
+  "dependencies": ["employee_domain_pack"],
+  "contents": {
+    "app_templates": [
+      {
+        "name": "Employee Registry Dashboard",
+        "widgets": ["EmployeeListTable", "SubmitActionBtn"]
+      }
+    ]
+  }
+}

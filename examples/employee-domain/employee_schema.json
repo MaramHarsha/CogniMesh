@@ -1,0 +1,11 @@
+{
+  "namespace_id": "hr_domain",
+  "api_name": "Employee",
+  "display_name": "Employee Profile",
+  "description": "Semantic model for employee profile records",
+  "primary_key_property": "id",
+  "status": "active",
+  "allowed_purposes": ["payroll", "analytics"],
+  "classification_tags": ["PII"],
+  "default_access": "read_metadata"
+}

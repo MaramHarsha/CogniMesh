@@ -1,0 +1,18 @@
+{{- range $name, $service := .Values.services }}
+{{- if and $service.enabled $service.persistence (default false $service.persistence.enabled) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}-state
+  labels:
+    {{- include "cognimesh.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $service.persistence.size | default "5Gi" | quote }}
+---
+{{- end }}
+{{- end }}

@@ -1,0 +1,29 @@
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+        grpc:
+    zipkin:
+    jaeger:
+      protocols:
+        thrift_http:
+        thrift_compact:
+        thrift_binary:
+
+ingester:
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_size_bytes: 4194304
+    compacted_block_size_bytes: 10485760
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/traces

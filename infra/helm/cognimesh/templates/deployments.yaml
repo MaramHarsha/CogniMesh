@@ -1,0 +1,99 @@
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "cognimesh.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  replicas: {{ $service.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "cognimesh.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $name }}
+  template:
+    metadata:
+      labels:
+        {{- include "cognimesh.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      {{- if hasPrefix "cognimesh/" $service.image.repository }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: "{{ $service.image.repository }}:{{ $service.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.global.imagePullPolicy | default "IfNotPresent" }}
+          {{- if $service.command }}
+          command:
+            {{- range $val := $service.command }}
+            - {{ $val | quote }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: service-port
+              containerPort: {{ $service.port }}
+          {{- if $service.env }}
+          env:
+            {{- range $k, $v := $service.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          {{- end }}
+          readinessProbe:
+            {{- if eq $name "postgres" }}
+            tcpSocket:
+              port: service-port
+            {{- else if eq $name "minio" }}
+            tcpSocket:
+              port: service-port
+            {{- else if or (eq $name "keycloak") (eq $name "console") }}
+            httpGet:
+              path: /
+              port: service-port
+            {{- else }}
+            httpGet:
+              path: /health
+              port: service-port
+            {{- end }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            {{- if eq $name "postgres" }}
+            tcpSocket:
+              port: service-port
+            {{- else if eq $name "minio" }}
+            tcpSocket:
+              port: service-port
+            {{- else if or (eq $name "keycloak") (eq $name "console") }}
+            httpGet:
+              path: /
+              port: service-port
+            {{- else }}
+            httpGet:
+              path: /health
+              port: service-port
+            {{- end }}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            {{- toYaml $service.resources | nindent 12 }}
+          {{- if and $service.persistence (default false $service.persistence.enabled) }}
+          volumeMounts:
+            - name: state-volume
+              mountPath: {{ $service.persistence.mountPath }}
+          {{- end }}
+      {{- if and $service.persistence (default false $service.persistence.enabled) }}
+      volumes:
+        - name: state-volume
+          persistentVolumeClaim:
+            claimName: {{ $name }}-state
+      {{- end }}
+---
+{{- end }}
+{{- end }}

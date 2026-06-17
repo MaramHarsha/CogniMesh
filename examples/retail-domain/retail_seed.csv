@@ -1,0 +1,6 @@
+order_id,customer_id,order_date,total_amount,status
+ord_001,cust_501,2026-06-01,150.50,COMPLETED
+ord_002,cust_502,2026-06-02,45.00,COMPLETED
+ord_003,cust_503,2026-06-03,89.99,PENDING
+ord_004,cust_504,2026-06-04,320.00,COMPLETED
+ord_005,cust_505,2026-06-05,12.75,CANCELLED

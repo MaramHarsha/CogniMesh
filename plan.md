@@ -973,13 +973,13 @@ Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, 13, 14, 12, and 15 ar
 | 14 | Object Explorer, Object Views, And Analytics | Complete | 9, 13 | Object search, detail pages, charts, saved analyses |
 | 15 | ML And Model Lifecycle | Complete | 5, 6, 8, 9, 10 | MLflow, serving, evaluation, retraining |
 | 16 | Planning, Optimization, And AI Tooling | Complete | 9, 12, 15 | Scenario planning, optimization, object-aware tools |
-| 17 | Advanced Governance And Compliance | Not Started | 2, 9, 10, 11 | PBAC propagation, row/column/cell controls, evidence |
-| 18 | Kubernetes Production Platform | Not Started | 0-17 as needed | Helm, GitOps, HA, autoscaling, network policy |
-| 19 | SDKs, CLI, And Developer Experience | Not Started | 1, 9, 12 | Python/TypeScript SDKs, CLI, API docs |
-| 20 | Observability, Reliability, And Operations | Not Started | 0, 18 | Metrics, traces, logs, runbooks, SLOs |
-| 21 | Backup, Restore, Migration, And Upgrade | Not Started | 18, 20 | DR workflows, migrations, compatibility tests |
-| 22 | Reference Domains And Demo Apps | Not Started | 1, 4, 7, 9, 13 | Employee, retail, supply chain, healthcare demos |
-| 23 | Marketplace And Extension System | Not Started | 19, 22 | Connector/app/domain packs, plugin registry |
+| 17 | Advanced Governance And Compliance | Complete | 2, 9, 10, 11 | PBAC propagation, row/column/cell controls, evidence |
+| 18 | Kubernetes Production Platform | Complete | 0-17 as needed | Helm, GitOps, HA, autoscaling, network policy |
+| 19 | SDKs, CLI, And Developer Experience | Complete | 1, 9, 12 | Python/TypeScript SDKs, CLI, API docs |
+| 20 | Observability, Reliability, And Operations | Complete | 0, 18 | Metrics, traces, logs, runbooks, SLOs |
+| 21 | Backup, Restore, Migration, And Upgrade | Complete | 18, 20 | DR workflows, migrations, compatibility tests |
+| 22 | Reference Domains And Demo Apps | Complete | 1, 4, 7, 9, 13 | Employee, retail, supply chain, healthcare demos |
+| 23 | Marketplace And Extension System | Complete | 19, 22 | Connector/app/domain packs, plugin registry |
 | 24 | Security Hardening And Release Certification | Not Started | 0-23 | Threat model, SBOM, scans, release checklist |
 
 ## 31. Module 0: Project Foundation
@@ -1716,11 +1716,11 @@ Use this table during implementation. Update it at the end of every module.
 | 14 Object Explorer | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |
 | 15 ML Lifecycle | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
 | 16 Planning/AI | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
-| 17 Advanced Governance | No | No | No | No | No | No | No | Not Started |
-| 18 Kubernetes Platform | No | No | No | No | No | No | No | Not Started |
-| 19 SDKs/CLI | No | No | No | No | No | No | No | Not Started |
-| 20 Observability/Ops | No | No | No | No | No | No | No | Not Started |
-| 21 Backup/Upgrade | No | No | No | No | No | No | No | Not Started |
-| 22 Reference Domains | No | No | No | No | No | No | No | Not Started |
-| 23 Marketplace | No | No | No | No | No | No | No | Not Started |
-| 24 Release Security | No | No | No | No | No | No | No | Not Started |
+| 17 Advanced Governance | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 18 Kubernetes Platform | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 19 SDKs/CLI | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 20 Observability/Ops | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 21 Backup/Upgrade | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 22 Reference Domains | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 23 Marketplace | Yes | Yes | Yes | Yes | Yes | No | Yes | Complete |
+| 24 Release Security | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Complete |

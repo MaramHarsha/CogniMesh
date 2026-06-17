@@ -397,6 +397,30 @@ services:
       org.cognimesh.module: "16"
       org.cognimesh.description: "Planning, Optimization, and AI Tooling control plane (scenarios, simulations, optimizations, agent tools, sessions, evaluations)"
 
+  governance-control:
+    build:
+      context: ../../services/governance-control
+    environment:
+      COGNIMESH_ENV: ${COGNIMESH_ENV:-local}
+      COGNIMESH_LOG_LEVEL: ${COGNIMESH_LOG_LEVEL:-INFO}
+      COGNIMESH_ALLOW_DEV_AUTH: ${COGNIMESH_ALLOW_DEV_AUTH:-true}
+      COGNIMESH_GOVERNANCE_STATE_PATH: /var/lib/cognimesh/governance-control/governance.db
+      COGNIMESH_OBJECT_REGISTRY_URL: http://object-registry:8000
+      COGNIMESH_QUERY_SERVICE_URL: http://query-service:8060
+      COGNIMESH_LINEAGE_ENDPOINT_URL: http://object-registry:8000/v1/lineage/openlineage
+    ports:
+      - "${COGNIMESH_GOVERNANCE_CONTROL_PORT:-8120}:8120"
+    volumes:
+      - cognimesh-governance-control-state:/var/lib/cognimesh/governance-control
+    depends_on:
+      object-registry:
+        condition: service_started
+      query-service:
+        condition: service_started
+    labels:
+      org.cognimesh.module: "17"
+      org.cognimesh.description: "Advanced Governance and Compliance control plane (classifications, purpose propagation, simulation, masking, row-filters, evidence, retention, legal holds)"
+
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.14.3
     profiles:
@@ -480,4 +504,5 @@ volumes:
   cognimesh-app-control-state:
   cognimesh-ml-control-state:
   cognimesh-planning-control-state:
+  cognimesh-governance-control-state:
   cognimesh-mlflow-data:

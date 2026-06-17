@@ -1,0 +1,38 @@
+groups:
+  - name: cognimesh-alerts
+    rules:
+      - alert: HighApiLatency
+        expr: http_request_duration_average_seconds > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API Latency on CogniMesh"
+          description: "CogniMesh API average latency is {{ $value }}s, exceeding threshold of 0.5s."
+
+      - alert: ElevatedHttpErrors
+        expr: rate(http_requests_errors_total[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elevated HTTP Errors detected"
+          description: "API HTTP request error rate is currently {{ $value }}/s."
+
+      - alert: PolicyDenialSpike
+        expr: rate(http_policy_denials_total[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Policy Denial Spike"
+          description: "Spike in policy denials: {{ $value }} denials/second, indicating potential unauthorized scraping or misconfigured client access."
+
+      - alert: StorageApproachingLimit
+        expr: storage_growth_bytes > 500000000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Lakehouse Storage Growth Alert"
+          description: "湖 (Lakehouse) storage growth rate is high, current estimate is {{ $value }} bytes."
