@@ -69,6 +69,9 @@ jobs:
           - name: planning-control
             service: services/planning-control
             modules: "16"
+          - name: governance-control
+            service: services/governance-control
+            modules: "17"
     steps:
       - name: Checkout
         uses: actions/checkout@v6

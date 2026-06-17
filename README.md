@@ -223,6 +223,17 @@ Local endpoints:
 - REST/OpenAPI: `http://localhost:8110/docs`
 - Health: `http://localhost:8110/health`
 
+### Governance Control
+
+Path: [services/governance-control](services/governance-control)
+
+Governance Control is the advanced governance and compliance control plane. It enforces classification rules and scans (PII/PHI), a purpose-propagation engine that inherits classification tags downstream through lineage to compute effective restrictions, policy simulation across user cohorts, granular masking (redact/hash/partial) and row-level filters by user context, a de-identification evidence sign-off workflow (e.g. k-anonymity) to declassify derived assets, and retention rules with legal holds. State changes are audit-logged.
+
+Local endpoints:
+
+- REST/OpenAPI: `http://localhost:8120/docs`
+- Health: `http://localhost:8120/health`
+
 ## Local Development
 
 ### Prerequisites

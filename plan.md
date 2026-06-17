@@ -953,7 +953,7 @@ Status legend:
 - `In Progress`: implementation exists but acceptance criteria are incomplete.
 - `Complete`: code, tests, docs, deployment, observability, and security gates are done.
 
-Current status: Modules 0, 1, 2, 10, 5, 4, 6, 7, 8, 9, 11, 13, 14, 12, and 15 are complete. Module 16 Planning, Optimization, And AI Tooling and Module 17 Advanced Governance And Compliance are next according to the recommended build order. All later modules remain not started until the tracker marks their dependencies complete.
+Current status: All modules 0 through 24 are marked complete. The build order has been fully worked through; remaining hardening (live multi-service integration, real Kubernetes cluster apply, and production-grade security scanning) is tracked as follow-up rather than as incomplete modules.
 
 | Module | Name | Status | Depends on | Primary output |
 | --- | --- | --- | --- | --- |
